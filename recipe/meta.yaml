@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.12.3" %}
+{% set version = "4.11.1" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 6072b969299b5989f4b236787f47162b59da77d827bacf33086b06fe69e7de6e
+  sha256: 3f2fa6475a16e958e172b51b48aa51bacb7572d432495ff4d0b2df152f1c27d2
 
 build:
   noarch: python
@@ -17,9 +17,9 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.6, <3.10
+    - python
   run:
-    - python >=3.6, <3.10
+    - python
     - numpy
     - requests
     - tqdm >=4.27
@@ -34,6 +34,10 @@ requirements:
     - pytorch
 
 test:
+  # workaround noarch bug in 3.10
+  requires:
+    - python <3.10
+
   imports:
     - transformers
     - transformers.benchmark
@@ -68,3 +72,4 @@ extra:
     - setu4993
     - hadim
     - wietsedv
+    - bkreider

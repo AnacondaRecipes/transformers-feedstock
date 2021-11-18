@@ -1,0 +1,6 @@
+[submodule "transformers-feedstock" ]
+    path = include/foo
+    branch = master
+	url = ../transformers-feedstock
+
+
