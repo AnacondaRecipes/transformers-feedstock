@@ -34,6 +34,10 @@ requirements:
     - pytorch
 
 test:
+  # workaround noarch bug in 3.10
+  requires:
+    - python <3.10
+
   imports:
     - transformers
     - transformers.benchmark
