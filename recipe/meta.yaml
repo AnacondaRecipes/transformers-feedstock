@@ -1,53 +1,74 @@
-{% set name = "transformers" %} 
-{% set version = "2.1.1" %}
+{% set name = "transformers" %}
+{% set version = "4.14.1" %}
 
 package:
-  name: "{{ name|lower }}"
-  version: "{{ version }}"
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: "bc0aee900929ee51ce1ad13e4c00b6b7900177e522ec4b393a2aab10fa02b7bd"
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 7359c1d484d23636d290072df899c1633e8d6bd5e48c6b15d22dc354e0024634
 
 build:
   noarch: python
   number: 0
-  entry_points:
-    - transformers=transformers.__main__:main
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
     - pip
-    - python
+    - python >=3.6
   run:
-    - boto3
+    - python >=3.6
     - numpy
-    - python
-    - regex
     - requests
+    - tqdm >=4.27
+    - tokenizers >=0.10.1,<0.11
+    - huggingface_hub
+    - dataclasses
+    - packaging
+    - filelock
+    - regex !=2019.12.17
     - sacremoses
-    - tqdm
+    - pyyaml
+    - pytorch
 
 test:
+  # workaround noarch bug in 3.10
+  requires:
+    - python <3.10
+
   imports:
     - transformers
+    - transformers.benchmark
+    - transformers.commands
     - transformers.data
+    - transformers.data.datasets
     - transformers.data.metrics
     - transformers.data.processors
+    - transformers.models
+    - transformers.pipelines
+    - transformers.sagemaker
+    - transformers.utils
+
   commands:
-    - transformers --help
-  requires:
-    - pytest
+    - transformers-cli --help
 
 about:
   home: https://github.com/huggingface/transformers
   license: Apache-2.0
   license_family: APACHE
   license_file: LICENSE
-  summary: "State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch"
+  summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
   doc_url: https://huggingface.co/transformers/
 
 extra:
   recipe-maintainers:
+    - mxr-conda
     - roccqqck
+    - oblute
+    - rluria14
+    - ndmaxar
+    - setu4993
+    - hadim
+    - wietsedv
