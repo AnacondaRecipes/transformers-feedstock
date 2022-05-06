@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.14.1" %}
+{% set version = "4.18.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 7359c1d484d23636d290072df899c1633e8d6bd5e48c6b15d22dc354e0024634
+  sha256: 16f7751c44f31d8f9a3811bccd80f1995e1cb0ffd9b7de60ef6ede2ab90a6fd4
 
 build:
   skip: True  # [py<36]
   number: 0
-  script: {{ PYTHON }} -m pip install . -U -vv
+  script: {{ PYTHON }} -m pip install . -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
 
