@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.14.1" %}
+{% set version = "4.18.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,37 +7,42 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 7359c1d484d23636d290072df899c1633e8d6bd5e48c6b15d22dc354e0024634
+  sha256: 16f7751c44f31d8f9a3811bccd80f1995e1cb0ffd9b7de60ef6ede2ab90a6fd4
 
 build:
-  noarch: python
+  skip: True  # [py<36 or win32]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - transformers-cli=transformers.commands.transformers_cli:main
 
 requirements:
   host:
     - pip
-    - python >=3.6
+    - python
+    - setuptools
+    - wheel
   run:
-    - python >=3.6
-    - numpy
-    - requests
-    - tqdm >=4.27
-    - tokenizers >=0.10.1,<0.11
-    - huggingface_hub
-    - dataclasses
-    - packaging
+    - python
+    - dataclasses  # [py<37]
     - filelock
-    - regex !=2019.12.17
-    - sacremoses
-    - pyyaml
+    - huggingface_hub >=0.1.0,<1.0
+    - importlib_metadata  # [py<38]
+    - numpy >=1.17
+    - packaging >=20.0
     - pytorch
+    - pyyaml >=5.1
+    - regex !=2019.12.17
+    - requests
+    - sacremoses
+    - tokenizers >=0.11.1,!=0.11.3,<0.13
+    - tqdm >=4.27
 
 test:
-  # workaround noarch bug in 3.10
   requires:
-    - python <3.10
-
+    - pip
+    # torch 1.6.0 requires future
+    - future  # [win64 and py==37]
   imports:
     - transformers
     - transformers.benchmark
@@ -50,17 +55,18 @@ test:
     - transformers.pipelines
     - transformers.sagemaker
     - transformers.utils
-
   commands:
+    - pip check
     - transformers-cli --help
 
 about:
   home: https://github.com/huggingface/transformers
   license: Apache-2.0
-  license_family: APACHE
+  license_family: Apache
   license_file: LICENSE
   summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
   doc_url: https://huggingface.co/transformers/
+  dev_url: https://github.com/huggingface/transformers
 
 extra:
   recipe-maintainers:
