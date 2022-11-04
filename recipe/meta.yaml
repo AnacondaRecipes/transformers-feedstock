@@ -60,8 +60,20 @@ about:
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
+  license_url: https://github.com/huggingface/transformers/blob/main/LICENSE
   summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
+  description: |
+    Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
+
+    These models can be applied on:
+
+    - 📝 Text, for tasks like text classification, information extraction, question answering, summarization, translation, text generation, in over 100 languages.
+    - 🖼️ Images, for tasks like image classification, object detection, and segmentation.
+    - 🗣️ Audio, for tasks like speech recognition and audio classification.
+    
+    Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
   doc_url: https://huggingface.co/transformers/
+  doc_source_url: https://github.com/huggingface/transformers/tree/main/docs/source
   dev_url: https://github.com/huggingface/transformers
 
 extra:
