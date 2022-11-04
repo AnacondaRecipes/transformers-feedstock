@@ -11,7 +11,7 @@ source:
 
 build:
   skip: True  # [py<36 or win32]
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
