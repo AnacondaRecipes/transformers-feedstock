@@ -24,25 +24,21 @@ requirements:
     - wheel
   run:
     - python
-    - dataclasses  # [py<37]
+    - importlib-metadata  # [py<38]
     - filelock
-    - huggingface_hub >=0.1.0,<1.0
-    - importlib_metadata  # [py<38]
+    - huggingface_hub >=0.10.0,<1.0
     - numpy >=1.17
     - packaging >=20.0
     - pytorch
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
-    - sacremoses
-    - tokenizers >=0.11.1,!=0.11.3,<0.13
+    - tokenizers >=0.11.1,!=0.11.3,<0.14
     - tqdm >=4.27
 
 test:
   requires:
     - pip
-    # torch 1.6.0 requires future
-    - future  # [win64 and py==37]
   imports:
     - transformers
     - transformers.benchmark
