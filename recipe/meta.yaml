@@ -10,8 +10,8 @@ source:
   sha256: 16f7751c44f31d8f9a3811bccd80f1995e1cb0ffd9b7de60ef6ede2ab90a6fd4
 
 build:
-  skip: True  # [py<36 or win32]
-  number: 0
+  skip: True  # [py<36]
+  number: 1
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -26,7 +26,7 @@ requirements:
     - python
     - dataclasses  # [py<37]
     - filelock
-    - huggingface_hub >=0.1.0,<1.0
+    - huggingface_hub >=0.1.0,<=0.9.1
     - importlib_metadata  # [py<38]
     - numpy >=1.17
     - packaging >=20.0
@@ -64,8 +64,20 @@ about:
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
+  license_url: https://github.com/huggingface/transformers/blob/main/LICENSE
   summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
+  description: |
+    Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
+
+    These models can be applied on:
+
+    - 📝 Text, for tasks like text classification, information extraction, question answering, summarization, translation, text generation, in over 100 languages.
+    - 🖼️ Images, for tasks like image classification, object detection, and segmentation.
+    - 🗣️ Audio, for tasks like speech recognition and audio classification.
+    
+    Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
   doc_url: https://huggingface.co/transformers/
+  doc_source_url: https://github.com/huggingface/transformers/tree/main/docs/source
   dev_url: https://github.com/huggingface/transformers
 
 extra:
