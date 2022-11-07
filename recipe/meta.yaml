@@ -61,7 +61,7 @@ about:
   license_family: Apache
   license_file: LICENSE
   license_url: https://github.com/huggingface/transformers/blob/main/LICENSE
-  summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
+  summary: State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow
   description: |
     Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
 
