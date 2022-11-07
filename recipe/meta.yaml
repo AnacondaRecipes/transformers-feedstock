@@ -72,7 +72,7 @@ about:
     - 🗣️ Audio, for tasks like speech recognition and audio classification.
     
     Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
-  doc_url: https://huggingface.co/transformers/index
+  doc_url: https://huggingface.co/docs/transformers/index
   doc_source_url: https://github.com/huggingface/transformers/tree/main/docs/source
   dev_url: https://github.com/huggingface/transformers
 
