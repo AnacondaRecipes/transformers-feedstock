@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.18.0" %}
+{% set version = "4.24.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,11 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 16f7751c44f31d8f9a3811bccd80f1995e1cb0ffd9b7de60ef6ede2ab90a6fd4
+  sha256: 486f353a8e594002e48be0e2aba723d96eda839e63bfe274702a4b5eda85559b
 
 build:
-  skip: True  # [py<36]
-  number: 1
+  skip: True  # [py<37]
+  number: 0
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -24,25 +24,21 @@ requirements:
     - wheel
   run:
     - python
-    - dataclasses  # [py<37]
+    - importlib-metadata  # [py<38]
     - filelock
-    - huggingface_hub >=0.1.0,<=0.9.1
-    - importlib_metadata  # [py<38]
+    - huggingface_hub >=0.10.0,<1.0
     - numpy >=1.17
     - packaging >=20.0
     - pytorch
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
-    - sacremoses
-    - tokenizers >=0.11.1,!=0.11.3,<0.13
+    - tokenizers >=0.11.1,!=0.11.3,<0.14
     - tqdm >=4.27
 
 test:
   requires:
     - pip
-    # torch 1.6.0 requires future
-    - future  # [win64 and py==37]
   imports:
     - transformers
     - transformers.benchmark
@@ -65,7 +61,7 @@ about:
   license_family: Apache
   license_file: LICENSE
   license_url: https://github.com/huggingface/transformers/blob/main/LICENSE
-  summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
+  summary: State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow
   description: |
     Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
 
@@ -76,7 +72,7 @@ about:
     - 🗣️ Audio, for tasks like speech recognition and audio classification.
     
     Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
-  doc_url: https://huggingface.co/transformers/
+  doc_url: https://huggingface.co/docs/transformers/index
   doc_source_url: https://github.com/huggingface/transformers/tree/main/docs/source
   dev_url: https://github.com/huggingface/transformers
 
