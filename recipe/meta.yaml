@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.24.0" %}
+{% set version = "4.29.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,11 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 486f353a8e594002e48be0e2aba723d96eda839e63bfe274702a4b5eda85559b
+  sha256: ed9467661f459f1ce49461d83f18f3b36b6a37f306182dc2ba272935f3b93ebb
 
 build:
   skip: True  # [py<37]
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -24,16 +24,19 @@ requirements:
     - wheel
   run:
     - python
+    # datasets required for transformers-cli.
+    - datasets
     - importlib-metadata  # [py<38]
     - filelock
-    - huggingface_hub >=0.10.0,<1.0
-    - numpy >=1.17
-    - packaging >=20.0
+    - huggingface_hub
+    - numpy
+    - packaging
     - pytorch
-    - pyyaml >=5.1
+    - pyyaml
     - regex !=2019.12.17
     - requests
-    - tokenizers >=0.11.1,!=0.11.3,<0.14
+    - sacremoses
+    - tokenizers >=0.11.1,!=0.11.3
     - tqdm >=4.27
 
 test:
