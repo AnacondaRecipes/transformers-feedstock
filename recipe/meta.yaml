@@ -28,7 +28,7 @@ requirements:
     - datasets
     - importlib-metadata  # [py<38]
     - filelock
-    - huggingface_hub
+    - huggingface_hub >=0.14.1,<1.0
     - numpy
     - packaging
     - pytorch
