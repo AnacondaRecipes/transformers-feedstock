@@ -35,7 +35,9 @@ requirements:
     - huggingface_hub >=0.14.1,<1.0
     - numpy
     - packaging
-    - pytorch
+    # TODO: Working around osx bug importing two openmp variants.
+    - pytorch  # [not (osx and x86_64)]
+    - pytorch <1.12,>1.9  # [osx and x86_64]
     - pyyaml
     - regex !=2019.12.17
     - requests
