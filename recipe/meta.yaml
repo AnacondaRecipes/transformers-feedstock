@@ -11,6 +11,10 @@ source:
 
 build:
   skip: True  # [py<37]
+  # s390x is missing pyrarrow that datasets depends on
+  skip: True  # [linux and s390x]
+  # At present, there are no 3.11 compatible Pytorch version for win or ppc
+  skip: True  # [py>310 and (pp64le or win)]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
