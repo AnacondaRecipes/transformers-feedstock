@@ -37,8 +37,8 @@ requirements:
     - numpy
     - packaging
     # TODO: Working around osx bug importing two openmp variants.
-    - pytorch  # [not (osx and x86_64)]
-    - pytorch <1.12,>1.9  # [osx and x86_64]
+    - pytorch             # [not (osx and x86_64)]
+    - pytorch >1.9,<1.12  # [osx and x86_64]
     - pyyaml
     - regex !=2019.12.17
     - requests
