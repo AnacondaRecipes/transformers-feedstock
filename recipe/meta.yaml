@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.24.0" %}
+{% set version = "4.29.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,12 +7,17 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 486f353a8e594002e48be0e2aba723d96eda839e63bfe274702a4b5eda85559b
+  sha256: ed9467661f459f1ce49461d83f18f3b36b6a37f306182dc2ba272935f3b93ebb
 
 build:
   skip: True  # [py<37]
+  # s390x is missing pyrarrow that datasets depends on
+  skip: True  # [linux and s390x]
+  # At present, there are no 3.11 compatible Pytorch version for win or ppc
+  # There is a bug requiring PyTorch 1.10 on osx-64 which is not available for 3.11 
+  skip: True  # [py>310 and (ppc64le or win or (osx and x86_64))]
   number: 0
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
 
@@ -24,16 +29,21 @@ requirements:
     - wheel
   run:
     - python
+    # datasets required for transformers-cli.
+    - datasets
     - importlib-metadata  # [py<38]
     - filelock
-    - huggingface_hub >=0.10.0,<1.0
-    - numpy >=1.17
-    - packaging >=20.0
-    - pytorch
-    - pyyaml >=5.1
+    - huggingface_hub >=0.14.1,<1.0
+    - numpy
+    - packaging
+    # TODO: Working around osx bug importing two openmp variants.
+    - pytorch             # [not (osx and x86_64)]
+    - pytorch >1.9,<1.12  # [osx and x86_64]
+    - pyyaml
     - regex !=2019.12.17
     - requests
-    - tokenizers >=0.11.1,!=0.11.3,<0.14
+    - sacremoses
+    - tokenizers >=0.11.1,!=0.11.3
     - tqdm >=4.27
 
 test:
@@ -60,7 +70,6 @@ about:
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
-  license_url: https://github.com/huggingface/transformers/blob/main/LICENSE
   summary: State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow
   description: |
     Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
@@ -73,7 +82,6 @@ about:
     
     Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
   doc_url: https://huggingface.co/docs/transformers/index
-  doc_source_url: https://github.com/huggingface/transformers/tree/main/docs/source
   dev_url: https://github.com/huggingface/transformers
 
 extra:
@@ -86,3 +94,5 @@ extra:
     - setu4993
     - hadim
     - wietsedv
+  skip-lints:
+    - python_build_tool_in_run
