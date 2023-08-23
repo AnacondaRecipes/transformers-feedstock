@@ -13,8 +13,6 @@ build:
   skip: True  # [py<37]
   # s390x is missing pyrarrow that datasets depends on
   skip: True  # [linux and s390x]
-  # Dropping ppc because of pytorch
-  skip: True  # [linux and ppc64le]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
@@ -50,12 +48,10 @@ test:
     - transformers.benchmark
     - transformers.commands
     - transformers.data
-    - transformers.data.datasets
-    - transformers.data.metrics
-    - transformers.data.processors
+    - transformers.kernels
     - transformers.models
     - transformers.pipelines
-    - transformers.sagemaker
+    - transformers.tools
     - transformers.utils
   commands:
     - pip check
