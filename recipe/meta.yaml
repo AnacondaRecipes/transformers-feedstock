@@ -43,8 +43,9 @@ requirements:
 test:
   requires:
     - pip
-    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models
-    - pytorch
+    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
+    # skip ppc64le because of lack of pytorch
+    - pytorch  # [not (linux and ppc64le)]
   imports:
     - transformers
     - transformers.benchmark
