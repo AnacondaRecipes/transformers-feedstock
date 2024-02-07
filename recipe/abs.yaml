@@ -1,3 +1,3 @@
 channels:  
-  - https://staging.continuum.io/prefect/fs/tokenizers-feedstock/pr9/ac4d968
-  - https://staging.continuum.io/prefect/fs/huggingface_hub-feedstock/pr6/920fe74
+  - https://staging.continuum.io/prefect/fs/huggingface_hub-feedstock/pr6/0e365c8
+  - https://staging.continuum.io/prefect/fs/tokenizers-feedstock/pr9/c22a13b
