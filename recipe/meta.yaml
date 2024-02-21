@@ -27,16 +27,16 @@ requirements:
   run:
     - python
     # datasets required for transformers-cli.
-    - datasets !=2.5.0
+    #- datasets !=2.5.0
     - importlib-metadata
     - filelock
-    - huggingface_hub >=0.15.1,<1.0
+    - huggingface_hub >=0.19.3,<1
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
-    - safetensors >=0.3.1
+    - safetensors >=0.4.1
     - tokenizers >=0.14,<0.19
     - tqdm >=4.27
 
