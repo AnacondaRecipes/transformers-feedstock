@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.32.1" %}
+{% set version = "4.37.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,10 +7,10 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 1edc8ae1de357d97c3d36b04412aa63d55e6fc0c4b39b419a7d380ed947d2252
+  sha256: f307082ae5d528b8480611a4879a4a11651012d0e9aaea3f6cf17219ffd95542
 
 build:
-  skip: True  # [py<37]
+  skip: True  # [py<38]
   # s390x is missing pyrarrow that datasets depends on
   skip: True  # [linux and s390x]
   number: 0
@@ -27,17 +27,17 @@ requirements:
   run:
     - python
     # datasets required for transformers-cli.
-    - datasets !=2.5.0
+    #- datasets !=2.5.0
     - importlib-metadata
     - filelock
-    - huggingface_hub >=0.15.1,<1.0
+    - huggingface_hub >=0.19.3,<1
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
-    - safetensors >=0.3.1
-    - tokenizers >=0.11.1,!=0.11.3,<0.14
+    - safetensors >=0.4.1
+    - tokenizers >=0.14,<0.19
     - tqdm >=4.27
 
 test:
