@@ -13,7 +13,7 @@ build:
   skip: True  # [py<38]
   # s390x is missing pyrarrow that datasets depends on
   skip: True  # [linux and s390x]
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -74,7 +74,7 @@ about:
     - 📝 Text, for tasks like text classification, information extraction, question answering, summarization, translation, text generation, in over 100 languages.
     - 🖼️ Images, for tasks like image classification, object detection, and segmentation.
     - 🗣️ Audio, for tasks like speech recognition and audio classification.
-    
+
     Transformer models can also perform tasks on several modalities combined, such as table question answering, optical character recognition, information extraction from scanned documents, video classification, and visual question answering.
   doc_url: https://huggingface.co/docs/transformers/index
   dev_url: https://github.com/huggingface/transformers
