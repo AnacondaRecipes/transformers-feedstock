@@ -13,7 +13,7 @@ build:
   skip: True  # [py<38]
   # s390x is missing pyrarrow that datasets depends on
   skip: True  # [linux and s390x]
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
