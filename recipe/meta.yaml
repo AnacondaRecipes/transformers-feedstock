@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/transformers/archive/refs/tags/v4.41.2.tar.gz
-  sha256: 80a4db216533d573e9cc7388646c31ed9480918feb7c55eb211249cb23567f87
+  sha256: a1dea0cae3e952f5e14b04a31c7ae173eb5c2f7149349e73405612be494a971c
 
 build:
   skip: True  # [py<38]
