@@ -41,11 +41,6 @@ requirements:
     - tqdm >=4.27
 
 test:
-  requires:
-    - pip
-    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    # skip ppc64le because of lack of pytorch
-    - pytorch  # [not (linux and ppc64le)]
   imports:
     - transformers
     - transformers.benchmark
@@ -54,11 +49,55 @@ test:
     - transformers.kernels
     - transformers.models
     - transformers.pipelines
-    - transformers.tools
     - transformers.utils
+  requires:
+    - pip
+    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
+    # skip ppc64le because of lack of pytorch
+    - pytorch  # [not (linux and ppc64le)]
+  {% if py<312 %}
+    - bs4
+    - datasets !=2.5.0
+    - nltk
+    - parameterized
+    - psutil
+    - pydantic
+    - pytest >=7.2.0,<8.0.0
+    - sentencepiece >=0.1.91,!=0.1.92
+    
+    - tensorboard
+  # Undeclared as testing deps
+    - pillow >=10.0.1,<=15.0
+    - huggingface_accelerate >=0.21.0
+  source_files:
+    - .
+  {% endif %}
   commands:
     - pip check
     - transformers-cli --help
+    {% set ignore_tests = " --ignore=tests/agents" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/deepspeed" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/extended" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/fixtures" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/fsdp" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/optimization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
+    {% set skip_tests = "return_timestamps_ctc_fast" %}  # requires librosa
+    {% set skip_tests = skip_tests + " or chunking_fast" %}  # requires librosa
+    {% set skip_tests = skip_tests + " or small_model_pt" %}  # requires librosa
+    {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
+    - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}  # [py<312]
 
 about:
   home: https://github.com/huggingface/transformers
