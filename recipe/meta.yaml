@@ -41,6 +41,8 @@ requirements:
     - tqdm >=4.27
 
 test:
+  source_files:
+    - .
   imports:
     - transformers
     - transformers.benchmark
@@ -53,9 +55,7 @@ test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    # skip ppc64le because of lack of pytorch
-    - pytorch  # [not (linux and ppc64le)]
-  {% if py<312 %}
+    - pytorch
     - bs4
     - datasets !=2.5.0
     - nltk
@@ -64,17 +64,15 @@ test:
     - pydantic
     - pytest >=7.2.0,<8.0.0
     - sentencepiece >=0.1.91,!=0.1.92
-    
     - tensorboard
   # Undeclared as testing deps
     - pillow >=10.0.1,<=15.0
     - huggingface_accelerate >=0.21.0
-  source_files:
-    - .
-  {% endif %}
   commands:
-    - pip check
+    # pip check fails for tensorboard on Python 3.12.
+    - pip check  # [py<312]
     - transformers-cli --help
+    # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
@@ -93,11 +91,14 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
-    {% set skip_tests = "return_timestamps_ctc_fast" %}  # requires librosa
-    {% set skip_tests = skip_tests + " or chunking_fast" %}  # requires librosa
-    {% set skip_tests = skip_tests + " or small_model_pt" %}  # requires librosa
+    # These tests require librosa, missing from defaults
+    {% set skip_tests = "return_timestamps_ctc_fast" %}
+    {% set skip_tests = skip_tests + " or chunking_fast" %}
+    {% set skip_tests = skip_tests + " or small_model_pt" %}
     {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
-    - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}  # [py<312]
+    # pytorch dynamo unsupported on Python 3.12
+    {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask"}  # [py>311]
+    - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
   home: https://github.com/huggingface/transformers
