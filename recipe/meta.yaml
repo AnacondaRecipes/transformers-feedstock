@@ -68,8 +68,7 @@ test:
     - pillow >=10.0.1,<=15.0
     - huggingface_accelerate >=0.21.0
   commands:
-    # pip check fails for tensorboard on Python 3.12.
-    - pip check  # [py<312]
+    - pip check
     - transformers-cli --help
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
