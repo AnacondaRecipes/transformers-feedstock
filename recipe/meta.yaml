@@ -64,7 +64,6 @@ test:
     - pydantic
     - pytest >=7.2.0,<8.0.0
     - sentencepiece >=0.1.91,!=0.1.92
-    - tensorboard
   # Undeclared as testing deps
     - pillow >=10.0.1,<=15.0
     - huggingface_accelerate >=0.21.0
@@ -98,7 +97,11 @@ test:
     {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
     # pytorch dynamo unsupported on Python 3.12
     {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
-    {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}  # [py>311]
+    # Requires cxx compiler
+    {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
+    # Tensorboard install conflicts
+    {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
+
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
