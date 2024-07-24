@@ -27,7 +27,7 @@ requirements:
   run:
     - python
     # datasets required for transformers-cli.
-    #- datasets !=2.5.0
+    - datasets !=2.5.0
     - importlib-metadata
     - filelock
     - huggingface_hub >=0.23.0,<1
@@ -57,7 +57,6 @@ test:
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
     - pytorch
     - bs4
-    - datasets !=2.5.0
     - nltk
     - parameterized
     - psutil
