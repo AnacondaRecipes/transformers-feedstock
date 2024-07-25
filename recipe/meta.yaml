@@ -1,19 +1,19 @@
 {% set name = "transformers" %}
-{% set version = "4.37.2" %}
+{% set version = "4.41.2" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: f307082ae5d528b8480611a4879a4a11651012d0e9aaea3f6cf17219ffd95542
+  url: https://github.com/huggingface/transformers/archive/refs/tags/v4.41.2.tar.gz
+  sha256: a1dea0cae3e952f5e14b04a31c7ae173eb5c2f7149349e73405612be494a971c
 
 build:
   skip: True  # [py<38]
   # s390x is missing pyrarrow that datasets depends on
   skip: True  # [linux and s390x]
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -27,25 +27,22 @@ requirements:
   run:
     - python
     # datasets required for transformers-cli.
-    #- datasets !=2.5.0
+    - datasets !=2.5.0
     - importlib-metadata
     - filelock
-    - huggingface_hub >=0.19.3,<1
+    - huggingface_hub >=0.23.0,<1
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
     - safetensors >=0.4.1
-    - tokenizers >=0.14,<0.19
+    - tokenizers >=0.19,<0.20
     - tqdm >=4.27
 
 test:
-  requires:
-    - pip
-    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    # skip ppc64le because of lack of pytorch
-    - pytorch  # [not (linux and ppc64le)]
+  source_files:
+    - .
   imports:
     - transformers
     - transformers.benchmark
@@ -54,11 +51,56 @@ test:
     - transformers.kernels
     - transformers.models
     - transformers.pipelines
-    - transformers.tools
     - transformers.utils
+  requires:
+    - pip
+    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
+    - pytorch
+    - bs4
+    - nltk
+    - parameterized
+    - psutil
+    - pydantic
+    - pytest >=7.2.0,<8.0.0
+    - sentencepiece >=0.1.91,!=0.1.92
+  # Undeclared as testing deps
+    - pillow >=10.0.1,<=15.0
+    - huggingface_accelerate >=0.21.0
   commands:
     - pip check
     - transformers-cli --help
+    # Ignoring tests in all subdirectories.
+    {% set ignore_tests = " --ignore=tests/agents" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/deepspeed" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/extended" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/fixtures" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/fsdp" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/optimization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
+    {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
+    # These tests require librosa, missing from defaults
+    {% set skip_tests = "return_timestamps_ctc_fast" %}
+    {% set skip_tests = skip_tests + " or chunking_fast" %}
+    {% set skip_tests = skip_tests + " or small_model_pt" %}
+    {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
+    # pytorch dynamo unsupported on Python 3.12
+    {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
+    # Requires cxx compiler
+    {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
+    # Tensorboard install conflicts
+    {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
+
+    - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
   home: https://github.com/huggingface/transformers
