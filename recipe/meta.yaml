@@ -55,7 +55,8 @@ test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    - pytorch
+    - pytorch >=2
+    - blas * openblas     # [osx and x86_64]
     - bs4
     - nltk
     - parameterized
