@@ -1,13 +1,13 @@
 {% set name = "transformers" %}
-{% set version = "4.41.2" %}
+{% set version = "4.44.1" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/huggingface/transformers/archive/refs/tags/v4.41.2.tar.gz
-  sha256: a1dea0cae3e952f5e14b04a31c7ae173eb5c2f7149349e73405612be494a971c
+  url: https://github.com/huggingface/transformers/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: b589796ff2c85953664e91a41c4959fdad4734d2aae6f88e02a246a73086f919
 
 build:
   skip: True  # [py<38]
@@ -39,6 +39,8 @@ requirements:
     - safetensors >=0.4.1
     - tokenizers >=0.19,<0.20
     - tqdm >=4.27
+  run_constrained:
+    - blas * openblas     # [osx and x86_64]
 
 test:
   source_files:
@@ -55,7 +57,7 @@ test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    - pytorch
+    - pytorch >=2
     - bs4
     - nltk
     - parameterized
