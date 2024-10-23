@@ -1,5 +1,0 @@
-channels:
-  - https://staging.continuum.io/prefect/fs/safetensors-feedstock/pr6/ee705a7
-  - https://staging.continuum.io/prefect/fs/accelerate-feedstock/pr6/5ffdf85
-  - https://staging.continuum.io/prefect/fs/tokenizers-feedstock/pr11/a30cb19
-  - https://staging.continuum.io/prefect/fs/accelerate-feedstock/pr6/5ffdf85
