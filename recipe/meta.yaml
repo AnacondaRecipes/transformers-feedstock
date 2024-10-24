@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.44.1" %}
+{% set version = "4.45.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,12 +7,10 @@ package:
 
 source:
   url: https://github.com/huggingface/transformers/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: b589796ff2c85953664e91a41c4959fdad4734d2aae6f88e02a246a73086f919
+  sha256: 9bd4891514f5dd9446ece8511caba6a7c677de7cb333084e03ad0b5345d57c95
 
 build:
   skip: True  # [py<38]
-  # s390x is missing pyrarrow that datasets depends on
-  skip: True  # [linux and s390x]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
@@ -28,19 +26,40 @@ requirements:
     - python
     # datasets required for transformers-cli.
     - datasets !=2.5.0
-    - importlib-metadata
     - filelock
-    - huggingface_hub >=0.23.0,<1
+    - huggingface_hub >=0.23.2,<1
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
     - safetensors >=0.4.1
-    - tokenizers >=0.19,<0.20
+    - tokenizers >=0.20,<0.21
     - tqdm >=4.27
   run_constrained:
     - blas * openblas     # [osx and x86_64]
+    # Extra dependencies
+    # tf
+    - tensorflow >2.9,<2.16
+    - tensorflow-cpu >2.9,<2.16
+    - tensorflow-text <2.16
+    - keras-nlp >=0.3.1,<0.14.0
+    # torch and accelerate
+    - huggingface_accelerate >=0.26.0
+    # flax
+    - flax >=0.4.1,<=0.7.0
+    # sentencepiece
+    - sentencepiece >=0.1.91,!=0.1.92
+    # vision
+    - pillow >=10.0.1,<=15.0
+    # integrations
+    - ray-tune >=2.7.0
+    # timm
+    - timm <=0.9.16
+    # codecarbon
+    - codecarbon ==1.2.0
+    # video
+    - av ==9.2.0
 
 test:
   source_files:
@@ -59,7 +78,9 @@ test:
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
     - pytorch >=2
     - bs4
-    - nltk
+    # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
+    # see https://github.com/huggingface/transformers/pull/33301
+    - nltk <=3.8.1
     - parameterized
     - psutil
     - pydantic
@@ -67,7 +88,7 @@ test:
     - sentencepiece >=0.1.91,!=0.1.92
   # Undeclared as testing deps
     - pillow >=10.0.1,<=15.0
-    - huggingface_accelerate >=0.21.0
+    - huggingface_accelerate >=0.26.0
   commands:
     - pip check
     - transformers-cli --help
