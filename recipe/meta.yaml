@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.37.2" %}
+{% set version = "4.39.3" %}
 
 package:
   name: {{ name|lower }}
@@ -7,13 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: f307082ae5d528b8480611a4879a4a11651012d0e9aaea3f6cf17219ffd95542
+  sha256: 2586e5ff4150f122716fc40f5530e92871befc051848fbe82600969c535b762d
 
 build:
   skip: True  # [py<38]
-  # s390x is missing pyrarrow that datasets depends on
-  skip: True  # [linux and s390x]
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
@@ -26,9 +24,6 @@ requirements:
     - wheel
   run:
     - python
-    # datasets required for transformers-cli.
-    #- datasets !=2.5.0
-    - importlib-metadata
     - filelock
     - huggingface_hub >=0.19.3,<1
     - numpy >=1.17
@@ -36,24 +31,26 @@ requirements:
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
-    - safetensors >=0.4.1
     - tokenizers >=0.14,<0.19
+    - safetensors >=0.4.1
     - tqdm >=4.27
 
 test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    # skip ppc64le because of lack of pytorch
-    - pytorch  # [not (linux and ppc64le)]
+    - pytorch
   imports:
     - transformers
     - transformers.benchmark
     - transformers.commands
     - transformers.data
+    - transformers.generation
+    - transformers.integrations
     - transformers.kernels
     - transformers.models
     - transformers.pipelines
+    - transformers.quantizers
     - transformers.tools
     - transformers.utils
   commands:
