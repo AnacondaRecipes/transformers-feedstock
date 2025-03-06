@@ -64,7 +64,7 @@ test:
     - .
   imports:
     - transformers
-    - transformers.benchmark
+    - transformers.agents
     - transformers.commands
     - transformers.data
     - transformers.kernels
