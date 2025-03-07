@@ -84,6 +84,7 @@ test:
     - pydantic
     - pytest >=7.2.0,<8.0.0
     - sentencepiece >=0.1.91,!=0.1.92
+    - rich
   # Undeclared as testing deps
     - pillow >=10.0.1,<=15.0
     - huggingface_accelerate >=0.26.0
@@ -109,6 +110,9 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
+    # torch.compile not available until pytorch 2.6
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312]
+    
     # These tests require librosa, missing from defaults
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
