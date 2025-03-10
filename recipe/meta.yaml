@@ -136,6 +136,21 @@ test:
     {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
     {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
 
+    # Require Mac OS 14 
+    {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
+
+    # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [linux and aarch64]
+
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
