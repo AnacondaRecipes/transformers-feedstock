@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "4.45.2" %}
+{% set version = "4.49.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/transformers/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 9bd4891514f5dd9446ece8511caba6a7c677de7cb333084e03ad0b5345d57c95
+  sha256: c298ba537204f9914a28f8460eba8279023eb56288bcf95c733bc571cc74109e
 
 build:
   skip: True  # [py<38]
@@ -27,15 +27,16 @@ requirements:
     # datasets required for transformers-cli.
     - datasets !=2.5.0
     - filelock
-    - huggingface_hub >=0.23.2,<1
+    - huggingface_hub >=0.26.0,<1
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
     - safetensors >=0.4.1
-    - tokenizers >=0.20,<0.21
+    - tokenizers >=0.21,<0.22
     - tqdm >=4.27
+    - protobuf
   run_constrained:
     - blas * openblas     # [osx and x86_64]
     # Extra dependencies
@@ -44,8 +45,6 @@ requirements:
     - tensorflow-cpu >2.9,<2.16
     - tensorflow-text <2.16
     - keras-nlp >=0.3.1,<0.14.0
-    # torch and accelerate
-    - huggingface_accelerate >=0.26.0
     # flax
     - flax >=0.4.1,<=0.7.0
     # sentencepiece
@@ -66,7 +65,7 @@ test:
     - .
   imports:
     - transformers
-    - transformers.benchmark
+    - transformers.agents
     - transformers.commands
     - transformers.data
     - transformers.kernels
@@ -86,10 +85,12 @@ test:
     - pydantic
     - pytest >=7.2.0,<8.0.0
     - sentencepiece >=0.1.91,!=0.1.92
+    - rich
   # Undeclared as testing deps
     - pillow >=10.0.1,<=15.0
     - huggingface_accelerate >=0.26.0
   commands:
+    - export PYTORCH_ENABLE_MPS_FALLBACK=1  # [osx]
     - pip check
     - transformers-cli --help
     # Ignoring tests in all subdirectories.
@@ -102,7 +103,6 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/fsdp" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/optimization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
@@ -111,10 +111,15 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
+    # # torch.compile not available until pytorch 2.6
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312]
+
     # These tests require librosa, missing from defaults
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
-    {% set skip_tests = skip_tests + " or small_model_pt" %}
+    {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
+    {% set skip_tests = skip_tests + " or pipeline_assisted_generation" %}
+    {% set skip_tests = skip_tests + " or test_return_timestamps_ctc_fast" %}   
     {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
     # pytorch dynamo unsupported on Python 3.12
     {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
@@ -122,6 +127,29 @@ test:
     {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
+
+    # Small floating point rounding errors. 
+    {% set skip_tests = skip_tests + " or small_model_pt" %}
+    {% set skip_tests = skip_tests + " or small_model_pt_fp16" %}
+    {% set skip_tests = skip_tests + " or small_model_pt_seq2seq" %}
+    {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
+    {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
+    {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
+
+    # Require Mac OS 14 
+    {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
+
+    # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [linux and aarch64]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
