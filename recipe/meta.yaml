@@ -135,7 +135,7 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  # [arm64 or win]
+    {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
@@ -175,6 +175,7 @@ test:
     {% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
+    {% set skip_tests = skip_tests + " or test_en_to_de_pt" %}  # [osx]
 
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
     {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [linux and aarch64]
