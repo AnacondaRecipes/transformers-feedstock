@@ -135,7 +135,7 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win]
+    {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win or osx]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
