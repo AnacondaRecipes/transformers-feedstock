@@ -186,6 +186,7 @@ test:
     - transformers.utils
   requires:
     - pip
+    - phonemizer
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
     - pytorch >=2.2  # [not (osx and arm64)]
     # PBP is using the GPU version for some reason:
@@ -240,6 +241,7 @@ test:
     {% set skip_tests = skip_tests + " or pipeline_assisted_generation" %}
     {% set skip_tests = skip_tests + " or test_return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
+    {% set skip_tests = skip_tests + " or test_pipeline_generation_kwargs" %}
     # pytorch dynamo unsupported on Python 3.12
     {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
     # Requires cxx compiler
@@ -271,9 +273,10 @@ test:
 
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
     {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [linux and aarch64]
-
     # Missing dependencies for the serving CLI
     {% set skip_tests = skip_tests + " or test_healthcheck" %}
+    # Needs authentification to https://huggingface.co/google/gemma-3-270m-it: 401 Client Error
+    {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
