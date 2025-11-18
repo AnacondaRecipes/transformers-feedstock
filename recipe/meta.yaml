@@ -1,20 +1,20 @@
 {% set name = "transformers" %}
-{% set version = "4.51.3" %}
+{% set version = "4.57.1" %}
 
 package:
-  name: {{ name|lower }}
+  name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://github.com/huggingface/transformers/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 3f637746c5dde387ae418d23741bdcee94aa6607c9ea256e708d5a0e811ef893
+  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 425e9f2e4281fe977be496902b5b4cd79c2bf0a6dab9e516bc16d2c56ab2f487
 
 build:
-  skip: True  # [py<39]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
+  skip: True  # [py<39]
 
 requirements:
   host:
@@ -24,66 +24,143 @@ requirements:
     - wheel
   run:
     - python
-    - datasets !=2.5.0
+    # We need either this pin or pyarrow<21.0.0
+    - datasets >=2.15.0
     - filelock
-    - huggingface_hub >=0.30.0,<1.0
+    - huggingface_hub >=0.34.0,<1.0
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
     - requests
     - safetensors >=0.4.3
-    - tokenizers >=0.21,<0.22
+    - tokenizers >=0.22.0,<=0.23.0
     - tqdm >=4.27
-    - protobuf
   run_constrained:
-    - blas * openblas     # [osx and x86_64]
-    # Extra dependencies by group
-    # Torch related
-    - pytorch >=2.0   # extra:torch
-    - accelerate >=0.26.0   # extra:accelerate
-    # TensorFlow related
-    - tensorflow >2.9,<2.16   # extra:tf
-    - tensorflow-text <2.16   # extra:tf
-    - keras-nlp >=0.3.1,<0.14.0     # extra:tf
-    - tensorflow-cpu >2.9,<2.16   # extra:serving
-    - keras >2.9,<2.16 # extra:serving
-    - tensorflow-probability <0.24   # extra:serving
-    # Flax related
-    - flax >=0.4.1,<=0.7.0   # extra:flax
-    - jax >=0.4.1,<=0.4.13 # extra:flax
-    - jaxlib >=0.4.1,<=0.4.13 # extra:flax
-    - optax >=0.0.8,<=0.1.4 # extra:flax
-    - scipy <1.13.0   # extra:flax
-    # Agents related
-    - datasets !=2.5.0 # extra:agents
-    - sentencepiece >=0.1.91,!=0.1.92   # extra:agents
-    # Vision related
-    - Pillow >=10.0.1,<=15.0   # extra:vision
-    # Japanese related
-    - fugashi >=1.0 # extra:ja
-    - ipadic >=1.0.0,<2.0 # extra:ja
-    - unidic_lite >=1.0.7 # extra:ja
-    - unidic >=1.0.2 # extra:ja
-    - sudachipy >=0.6.6 # extra:ja
-    - sudachidict_core >=20220729 # extra:ja
-    - rhoknp >=1.1.0,<1.3.1   # extra:ja
-    # ONNX related
-    - onnxruntime >=1.4.0 # extra:onnxruntime
-    - onnxruntime-tools >=1.4.2   # extra:onnxruntime
-    # Miscellaneous
-    - timm <=1.0.11     # extra:timm
-    - codecarbon >=2.8.1     # extra:codecarbon
-    - av ==9.2.0   # video
-    - ray-tune >=2.7.0
-    - kernels >=0.3.2,<0.4   # extra:hub-kernels
-    - ray >=2.7.0   # extra:ray
-    - deepspeed >=0.9.3   # extra:deepspeed
-    - cookiecutter ==1.7.3   # extra:modelcreation
-    - natten >=0.14.6,<0.15.0   # extra:natten
-    - sagemaker >=2.31.0   # extra:sagemaker
-    - huggingface-hub >=0.30.0,<1.0 # extra:tiktoken
-    - pyctcdecode >=0.4.0 # extra:tf-speech
+    # Duplicates are commented to avoid build errors!!!
+    # ja(Japanese) related
+    - fugashi >=1.0 
+    - ipadic >=1.0.0,<2.0 
+    - unidic_lite >=1.0.7 
+    - unidic >=1.0.7
+    - sudachipy >=0.6.6 
+    - sudachidict_core >=20220729 
+    - rhoknp >=1.1.0,<1.3.1   
+    # sklearn related
+    - scikit-learn
+    # tf(TensorFlow) related
+    - tensorflow >2.9,<2.16 
+    - onnxconverter-common
+    - tf2onnx 
+    - tensorflow-text <2.16
+    - keras-nlp >=0.3.1,<0.14.0  
+    # tf-cpu related
+    - keras >2.9,<2.16
+    - tensorflow-cpu >2.9,<2.16
+    #- onnxconverter-common
+    #- tf2onnx
+    #- tensorflow-text <2.16
+    #- keras-nlp >=0.3.1,<0.14.0  
+    - tensorflow-probability <0.24
+    # torch related
+    - pytorch >=2.2
+    - accelerate >=0.26.0
+    # accelerate related
+    #- accelerate >=0.26.0
+    # hf_xet related
+    - hf_xet
+    # retrieval related
+    - faiss-cpu  # [unix]
+    # flax related
+    - jax >=0.4.1,<=0.4.13  # [unix]
+    - jaxlib >=0.4.1,<=0.4.13  # [unix]
+    - flax >=0.4.1,<=0.7.0  # [unix]
+    - optax >=0.0.8,<=0.1.4  # [unix]
+    # SciPy >= 1.13.0 is not supported with the current jax pin (`jax>=0.4.1,<=0.4.13`)
+    - scipy <1.13.0  # [unix]
+    # ftfy related
+    - ftfy
+    # onnxruntime related
+    - onnxruntime >=1.4.0 
+    - onnxruntime-tools >=1.4.2   
+    # onnx related
+    #- onnxconverter-common
+    #- tf2onnx
+    #- onnxruntime >=1.4.0
+    # modelcreation related
+    - cookiecutter ==1.7.3
+    # sagemaker related
+    - sagemaker >=2.31.0
+    # deepspeed related
+    - deepspeed >=0.9.3
+    #- accelerate >=0.26.0
+    # optuna related
+    - optuna
+    # ray related
+    - ray >=2.7.0
+    # sigopt related
+    - sigopt
+    # hub-kernels related
+    - kernels >=0.6.1,<=0.9
+    # integrations related
+    #- kernels >=0.6.1,<=0.9
+    #- optuna
+    #- ray >=2.7.0
+    # serving related
+    - openai >=1.98.0
+    - pydantic >=2
+    - uvicorn
+    - fastapi
+    - starlette
+    #- pytorch >=2.2
+    #- accelerate >=0.26.0
+    # audio, tf-speech, flax-speech related
+    - librosa
+    - pyctcdecode >=0.4.0
+    - phonemizer
+    - kenlm
+    # speech, torch-speech related
+    - torchaudio
+    #- librosa
+    #- pyctcdecode >=0.4.0
+    #- phonemizer
+    #- kenlm
+    # vision related
+    - pillow >=10.0.1,<=15.0
+    # timm related
+    - timm <=1.0.19,!=1.0.18
+    # torch-vision related
+    - torchvision
+    #- pillow >=10.0.1,<=15.0
+    # natten related
+    - natten >=0.14.6,<0.15.0
+    # codecarbon related
+    - codecarbon >=2.8.1
+    # video related
+    - av
+    # num2words related
+    - num2words
+    # sentencepiece related
+    - sentencepiece >=0.1.91,!=0.1.92
+    - protobuf
+    # tiktoken related
+    - tiktoken
+    - blobfile
+    # mistral-common related
+    - mistral-common >=1.6.3
+    - opencv-python
+    # chat_template related
+    - jinja2 >=3.1.0
+    # torchhub related
+    - importlib_metadata
+    #- sentencepiece >=0.1.91,!=0.1.92
+    #- pytorch >=2.2
+    # benchmark related
+    - optimum-benchmark >=0.3.0
+    # open-telemetry related
+    - opentelemetry-api
+    - opentelemetry-exporter-otlp
+    - opentelemetry-sdk
 
 test:
   source_files:
@@ -100,14 +177,14 @@ test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    - pytorch >=2
+    - pytorch >=2.2
     - bs4
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
     # see https://github.com/huggingface/transformers/pull/33301
     - nltk <=3.8.1
     - parameterized
     - psutil
-    - pydantic
+    - pydantic >=2
     - pytest >=7.2.0,<8.0.0
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
