@@ -187,7 +187,9 @@ test:
   requires:
     - pip
     # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    - pytorch >=2.2
+    - pytorch >=2.2  # [not (osx and arm64)]
+    # PBP is using the GPU version for some reason:
+    - pytorch =2.7.0=cpu_openblas_*  # [osx and arm64]
     - bs4
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
     # see https://github.com/huggingface/transformers/pull/33301
@@ -224,8 +226,11 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
-    # # torch.compile not available until pytorch 2.6
+    # torch.compile not available until pytorch 2.6
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312]
+    #     mode: ValidationMode = ValidationMode.test,
+    # E   NameError: name 'ValidationMode' is not defined
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
 
     # These tests require librosa, missing from defaults
     {% set skip_tests = "return_timestamps_ctc_fast" %}
