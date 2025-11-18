@@ -167,12 +167,22 @@ test:
     - .
   imports:
     - transformers
-    - transformers.agents
+    - transformers.activations
+    - transformers.audio_utils
+    - transformers.cache_utils
     - transformers.commands
-    - transformers.data
-    - transformers.kernels
+    - transformers.configuration_utils
+    - transformers.convert_slow_tokenizer
+    - transformers.generation
+    - transformers.image_processing_base
+    - transformers.image_processing_utils_fast
+    - transformers.image_utils
     - transformers.models
     - transformers.pipelines
+    - transformers.processing_utils
+    - transformers.tokenization_utils
+    - transformers.tokenization_utils_base
+    - transformers.tokenization_utils_fast
     - transformers.utils
   requires:
     - pip
