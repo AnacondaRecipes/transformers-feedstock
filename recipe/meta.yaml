@@ -244,6 +244,7 @@ test:
     {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
     # Requires cxx compiler
     {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
+    {% set skip_tests = skip_tests + " or test_model_generate" %}
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
@@ -270,6 +271,9 @@ test:
 
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
     {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [linux and aarch64]
+
+    # Missing dependencies for the serving CLI
+    {% set skip_tests = skip_tests + " or test_healthcheck" %}
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
