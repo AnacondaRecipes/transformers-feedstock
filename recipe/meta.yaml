@@ -46,12 +46,8 @@ requirements:
     - sudachipy >=0.6.6 
     - sudachidict_core >=20220729 
     - rhoknp >=1.1.0,<1.3.1   
-    # sklearn related
-    - scikit-learn
     # tf(TensorFlow) related
     - tensorflow >2.9,<2.16 
-    - onnxconverter-common
-    - tf2onnx 
     - tensorflow-text <2.16
     - keras-nlp >=0.3.1,<0.14.0  
     # tf-cpu related
@@ -67,10 +63,6 @@ requirements:
     - accelerate >=0.26.0
     # accelerate related
     #- accelerate >=0.26.0
-    # hf_xet related
-    - hf_xet
-    # retrieval related
-    - faiss-cpu  # [unix]
     # flax related
     - jax >=0.4.1,<=0.4.13  # [unix]
     - jaxlib >=0.4.1,<=0.4.13  # [unix]
@@ -78,14 +70,10 @@ requirements:
     - optax >=0.0.8,<=0.1.4  # [unix]
     # SciPy >= 1.13.0 is not supported with the current jax pin (`jax>=0.4.1,<=0.4.13`)
     - scipy <1.13.0  # [unix]
-    # ftfy related
-    - ftfy
     # onnxruntime related
     - onnxruntime >=1.4.0 
     - onnxruntime-tools >=1.4.2   
     # onnx related
-    #- onnxconverter-common
-    #- tf2onnx
     #- onnxruntime >=1.4.0
     # modelcreation related
     - cookiecutter ==1.7.3
@@ -94,73 +82,42 @@ requirements:
     # deepspeed related
     - deepspeed >=0.9.3
     #- accelerate >=0.26.0
-    # optuna related
-    - optuna
     # ray related
     - ray >=2.7.0
-    # sigopt related
-    - sigopt
     # hub-kernels related
     - kernels >=0.6.1,<=0.9
     # integrations related
     #- kernels >=0.6.1,<=0.9
-    #- optuna
     #- ray >=2.7.0
     # serving related
     - openai >=1.98.0
     - pydantic >=2
-    - uvicorn
-    - fastapi
-    - starlette
     #- pytorch >=2.2
     #- accelerate >=0.26.0
     # audio, tf-speech, flax-speech related
-    - librosa
     - pyctcdecode >=0.4.0
-    - phonemizer
-    - kenlm
     # speech, torch-speech related
-    - torchaudio
-    #- librosa
     #- pyctcdecode >=0.4.0
-    #- phonemizer
-    #- kenlm
     # vision related
     - pillow >=10.0.1,<=15.0
     # timm related
     - timm <=1.0.19,!=1.0.18
-    # torch-vision related
-    - torchvision
     #- pillow >=10.0.1,<=15.0
     # natten related
     - natten >=0.14.6,<0.15.0
     # codecarbon related
     - codecarbon >=2.8.1
-    # video related
-    - av
-    # num2words related
-    - num2words
     # sentencepiece related
     - sentencepiece >=0.1.91,!=0.1.92
-    - protobuf
-    # tiktoken related
-    - tiktoken
-    - blobfile
     # mistral-common related
     - mistral-common >=1.6.3
-    - opencv-python
     # chat_template related
     - jinja2 >=3.1.0
     # torchhub related
-    - importlib_metadata
     #- sentencepiece >=0.1.91,!=0.1.92
     #- pytorch >=2.2
     # benchmark related
     - optimum-benchmark >=0.3.0
-    # open-telemetry related
-    - opentelemetry-api
-    - opentelemetry-exporter-otlp
-    - opentelemetry-sdk
 
 test:
   source_files:
