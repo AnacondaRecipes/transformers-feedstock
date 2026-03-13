@@ -14,7 +14,7 @@ build:
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers-cli=transformers.commands.transformers_cli:main
-  skip: True  # [py<39]
+  skip: true  # [py<310]
 
 requirements:
   host:
