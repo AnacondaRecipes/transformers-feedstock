@@ -23,19 +23,19 @@ requirements:
     - setuptools
     - wheel
   run:
-    - python
     # We need either this pin or pyarrow<21.0.0
     - datasets >=2.15.0
-    - filelock
-    - huggingface_hub >=0.34.0,<1.0
+
+    - python
+    - huggingface-hub >=1.3.0,<2.0
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
     - regex !=2019.12.17
-    - requests
     - safetensors >=0.4.3
     - tokenizers >=0.22.0,<=0.23.0
     - tqdm >=4.27
+    - typer
   run_constrained:
     # Duplicates are commented to avoid build errors!!!
     # ja(Japanese) related
@@ -46,78 +46,64 @@ requirements:
     - sudachipy >=0.6.6
     - sudachidict_core >=20220729
     - rhoknp >=1.1.0,<1.3.1
-    # tf(TensorFlow) related
-    - tensorflow >2.9,<2.16
-    - tensorflow-text <2.16
-    - keras-nlp >=0.3.1,<0.14.0
-    # tf-cpu related
-    - keras >2.9,<2.16
-    - tensorflow-cpu >2.9,<2.16
-    #- onnxconverter-common
-    #- tf2onnx
-    #- tensorflow-text <2.16
-    #- keras-nlp >=0.3.1,<0.14.0
-    - tensorflow-probability <0.24
     # torch related
-    - pytorch >=2.2
-    - accelerate >=0.26.0
+    - pytorch >=2.4
+    - accelerate >=1.1.0
     # accelerate related
-    #- accelerate >=0.26.0
-    # flax related
-    - jax >=0.4.1,<=0.4.13  # [unix]
-    - jaxlib >=0.4.1,<=0.4.13  # [unix]
-    - flax >=0.4.1,<=0.7.0  # [unix]
-    - optax >=0.0.8,<=0.1.4  # [unix]
-    # SciPy >= 1.13.0 is not supported with the current jax pin (`jax>=0.4.1,<=0.4.13`)
-    - scipy <1.13.0  # [unix]
-    # onnxruntime related
-    - onnxruntime >=1.4.0
-    - onnxruntime-tools >=1.4.2
-    # onnx related
-    #- onnxruntime >=1.4.0
-    # modelcreation related
-    - cookiecutter ==1.7.3
+    #- accelerate >=1.1.0
     # sagemaker related
     - sagemaker >=2.31.0
     # deepspeed related
     - deepspeed >=0.9.3
-    #- accelerate >=0.26.0
+    #- accelerate >=1.1.0
     # ray related
     - ray >=2.7.0
-    # hub-kernels related
-    - kernels >=0.6.1,<=0.9
+    # kernels related
+    - kernels >=0.10.2,<0.11
     # integrations related
-    #- kernels >=0.6.1,<=0.9
+    #- kernels >=0.10.2,<0.11
+    - optuna
+    - codecarbon
     #- ray >=2.7.0
     # serving related
     - openai >=1.98.0
     - pydantic >=2
-    #- pytorch >=2.2
+    - uvicorn
+    - fastapi
+    - starlette
+    - rich
+    #- pytorch >=2.4
     #- accelerate >=0.26.0
-    # audio, tf-speech, flax-speech related
+    # audio related
+    - torchaudio
+    - librosa
     - pyctcdecode >=0.4.0
-    # speech, torch-speech related
-    #- pyctcdecode >=0.4.0
+    - phonemizer
+    - kenlm  # [py<313]
     # vision related
     - pillow >=10.0.1,<=15.0
     # timm related
-    - timm <=1.0.19,!=1.0.18
+    - timm >=1.0.23
     #- pillow >=10.0.1,<=15.0
-    # natten related
-    - natten >=0.14.6,<0.15.0
     # codecarbon related
     - codecarbon >=2.8.1
     # sentencepiece related
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common related
-    - mistral-common >=1.6.3
+    - mistral-common >=1.8.8
     # chat_template related
     - jinja2 >=3.1.0
     # torchhub related
     #- sentencepiece >=0.1.91,!=0.1.92
-    #- pytorch >=2.2
-    # benchmark related
-    - optimum-benchmark >=0.3.0
+    #- pytorch >=2.4
+
+    #- evaluate >=0.4.6
+    #- jmespath >=1.0.1
+    #- mistral-common[image]>=1.8.8
+    #- peft >=0.18.0
+    #- ray[tune] >=2.7.0
+    #- opentelemetry-exporter-otlp
+    #- opentelemetry-sdk
 
 test:
   source_files:
@@ -143,8 +129,8 @@ test:
     - transformers.utils
   requires:
     - pip
-    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow/flax for models.
-    - pytorch >=2.2  # [not (osx and arm64)]
+    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow for models.
+    - pytorch >=2.4  # [not (osx and arm64)]
     # PBP is using the GPU version for some reason:
     - pytorch =2.7.0=cpu_openblas_*  # [osx and arm64]
     - bs4
