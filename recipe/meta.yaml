@@ -34,11 +34,17 @@ requirements:
     - tqdm >=4.27
     - typer
   run_constrained:
-    # Duplicates are commented to avoid build errors!!!
-
-    # torch:
+    # Shared pinnings (avoid build errors due to duplicates):
     - pytorch >=2.4
     - accelerate >=1.1.0
+    - kernels >=0.10.2,<0.11
+    - codecarbon >=2.8.1
+    - ray >=2.7.0
+
+    # Unique optional dependencies (extras without version pinnings are commented)
+    # torch:
+    #- pytorch (shared)
+    #- accelerate (shared)
 
     # vision:
     # - torchvision
@@ -58,7 +64,7 @@ requirements:
     - timm >=1.0.23
 
     # kernels:
-    - kernels >=0.10.2,<0.11
+    #- kernels (shared)
 
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
@@ -79,7 +85,7 @@ requirements:
     #- scikit-learn
 
     # accelerate:
-    #- accelerate >=1.1.0
+    #- accelerate (shared)
 
     # retrieval
     - faiss-cpu
@@ -90,22 +96,22 @@ requirements:
 
     # deepspeed:
     - deepspeed >=0.9.3
-    #- accelerate >=1.1.0
+    #- accelerate (shared)
     
     # optuna:
     #- optuna
 
     # integrations:
-    #- kernels >=0.10.2,<0.11
+    #- kernels (shared)
     #- optuna
-    - codecarbon >=2.8.1
-    - ray >=2.7.0
+    #- codecarbon (shared)
+    #- ray (shared)
 
     # ray:
-    #- ray >=2.7.0
+    #- ray (shared)
 
     # codecarbon:
-    #- codecarbon >=2.8.1
+    #- codecarbon (shared)
 
     # serving:
     - openai >=1.98.0
@@ -114,8 +120,8 @@ requirements:
     #- fastapi
     #- starlette
     #- rich
-    #- pytorch >=2.4
-    #- accelerate >=0.26.0
+    #- pytorch (shared)
+    #- accelerate (shared)
 
     # num2words:
     #- num2words
