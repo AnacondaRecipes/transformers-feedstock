@@ -57,15 +57,6 @@ requirements:
     # timm:
     - timm >=1.0.23
 
-    # quality
-    - datasets >=2.15.0  # We need either this pin or pyarrow<21.0.0
-    - ruff ==0.14.10
-    - GitPython <3.1.19
-    - urllib3 <2.0.0
-    #- libcst
-    #- rich
-    - ty ==0.0.12
-
     # kernels:
     - kernels >=0.10.2,<0.11
 
