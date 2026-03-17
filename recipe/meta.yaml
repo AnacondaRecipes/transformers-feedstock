@@ -151,7 +151,6 @@ test:
     - transformers.activations
     - transformers.audio_utils
     - transformers.cache_utils
-    - transformers.commands
     - transformers.configuration_utils
     - transformers.convert_slow_tokenizer
     - transformers.generation
