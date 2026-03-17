@@ -260,6 +260,10 @@ test:
     # Module not found "phonemizer"
     {% set skip_tests = skip_tests + " or test_forward_model_kwargs" %}
 
+
+    {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
+    {% set skip_tests = skip_tests + " or test_pt_ignore_subwords_slow_tokenizer_raises" %}  # [py<313]
+
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
