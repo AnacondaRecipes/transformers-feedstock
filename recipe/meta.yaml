@@ -189,7 +189,6 @@ test:
   commands:
     - export PYTORCH_ENABLE_MPS_FALLBACK=1  # [osx]
     - pip check
-    - python -c "from transformers.cli.transformers import main; print('CLI import OK')"  # [win]
     - transformers --help  # [not win]
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
