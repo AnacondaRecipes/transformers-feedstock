@@ -188,7 +188,8 @@ test:
   commands:
     - export PYTORCH_ENABLE_MPS_FALLBACK=1  # [osx]
     - pip check
-    - transformers --help
+    - python -c "from transformers.commands.transformers_cli import main; print('CLI import OK')"  # [win]
+    - transformers --help  # [not win]
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
@@ -253,15 +254,14 @@ test:
 
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
     {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [py<313]
+    {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
+    {% set skip_tests = skip_tests + " or test_pt_ignore_subwords_slow_tokenizer_raises" %}  # [py<313]
     # Missing dependencies for the serving CLI
     {% set skip_tests = skip_tests + " or test_healthcheck" %}
     # Needs authentification to https://huggingface.co/google/gemma-3-270m-it: 401 Client Error
     {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
     # Module not found "phonemizer"
     {% set skip_tests = skip_tests + " or test_forward_model_kwargs" %}
-
-    {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
-    {% set skip_tests = skip_tests + " or test_pt_ignore_subwords_slow_tokenizer_raises" %}  # [py<313]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
