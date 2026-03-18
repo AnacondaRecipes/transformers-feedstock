@@ -41,7 +41,7 @@ requirements:
     - codecarbon >=2.8.1
     - ray >=2.7.0
 
-    # Unique optional dependencies (extras without version pinnings are commented)
+    # Unique optional dependencies (extras without specified version pinnings are also commented out)
     # torch:
     #- pytorch (shared)
     #- accelerate (shared)
