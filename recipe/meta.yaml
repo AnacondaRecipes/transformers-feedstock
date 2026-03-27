@@ -167,7 +167,7 @@ test:
     - transformers.utils
   requires:
     - pip
-    # to satisfy `transformers-cli --help` because it raises a warning of missing pytorch/tensorflow for models.
+    # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
     - pytorch >=2.4  # [not (osx and arm64)]
     # PBP is using the GPU version for some reason:
     - pytorch =2.7.0=cpu_openblas_*  # [osx and arm64]
@@ -188,7 +188,7 @@ test:
   commands:
     - export PYTORCH_ENABLE_MPS_FALLBACK=1  # [osx]
     - pip check
-    - transformers --help  # [not win]
+    - transformers --help
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
