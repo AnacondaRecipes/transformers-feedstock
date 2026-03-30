@@ -214,6 +214,8 @@ test:
     #     mode: ValidationMode = ValidationMode.test,
     # E   NameError: name 'ValidationMode' is not defined
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
+    # Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows - fatal exception: access violation
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
 
     # These tests require librosa, missing from defaults
     {% set skip_tests = "return_timestamps_ctc_fast" %}
