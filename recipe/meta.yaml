@@ -205,6 +205,11 @@ test:
     {% set skip_tests = skip_tests + " or test_cli_download" %}
     # TypeError: iteration over a 0-d array
     {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
+    # problematic compatibility with pytorch 2.8 on osx-metal (GPU). Higher pytorch versions available for
+    # python 3.12 and up. Skipping those tests is more reasonable than switching to CPU.
+    {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
+    {% set skip_tests = skip_tests + " or test_small_chat_model_with_response_parsing" %}  # [osx and py<312]
+    {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
