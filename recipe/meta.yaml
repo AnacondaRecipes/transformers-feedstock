@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: cb34ca89dce345ae3224b290346b9c0fa9694b951d54f3ed16334a4b1bfe3d04
+  sha256: 384d2f72db4ae498f1450f24785b6b03396595485e4f43357fd9d2f062f9b356
 
 build:
   number: 0
@@ -35,7 +35,6 @@ requirements:
     - tqdm >=4.27
     - typer
     - filelock
-
   run_constrained:
     # datasets
     - datasets >=2.15.0
@@ -99,9 +98,6 @@ requirements:
     # benchmark related
     - optimum-benchmark >=0.3.0
     - schedulefree >=1.2.6
-    - opentelemetry-api
-    - opentelemetry-exporter-otlp
-    - opentelemetry-sdk
 
 test:
   source_files:
