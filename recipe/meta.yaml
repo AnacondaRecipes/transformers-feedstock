@@ -106,7 +106,7 @@ test:
   requires:
     - pip
     # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
-    - pytorch >=2.4  # [not (osx and arm64)]
+    - pytorch
     # PBP is using the GPU version for some reason:
     - bs4
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
