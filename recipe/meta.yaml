@@ -76,7 +76,7 @@ requirements:
     #- blobfile
 
     # mistral-common:
-    - mistral-common >=1.8.8
+    - mistral-common >=1.8.8  # [py<314]
 
     # chat_template:
     - jinja2 >=3.1.0
