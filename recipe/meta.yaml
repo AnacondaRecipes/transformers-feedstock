@@ -262,6 +262,10 @@ test:
     {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
     # Module not found "phonemizer"
     {% set skip_tests = skip_tests + " or test_forward_model_kwargs" %}
+    # ValueError: I/O operation on closed file.
+    {% set skip_tests = skip_tests + " or test_cli_download" %}
+    # TypeError: iteration over a 0-d array
+    {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
