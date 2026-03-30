@@ -90,7 +90,7 @@ requirements:
 
     # retrieval
     - faiss-cpu
-    - datasets >=2.15.0  # We need either this pin or pyarrow<21.0.0
+    - datasets >=2.15.0
 
     # sagemaker:
     - sagemaker >=2.31.0
