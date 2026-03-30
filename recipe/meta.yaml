@@ -209,14 +209,14 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
-    # torch.compile not available until pytorch 2.6
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312]
+    # torch.compile not available until pytorch 2.6; May also Windows CI, see reason below
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312 or win]
+    # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
+    # fatal exception: access violation
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
     #     mode: ValidationMode = ValidationMode.test,
     # E   NameError: name 'ValidationMode' is not defined
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
-    # Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows - fatal exception: access violation
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
-    {% set ignore_tests = ignore_tests + " --deselect=tests/test_pipeline_mixin.py::AutomaticSpeechRecognitionPipelineTests::test_return_timestamps_in_init" %}  # [win]
 
     # These tests require librosa, missing from defaults
     {% set skip_tests = "return_timestamps_ctc_fast" %}
