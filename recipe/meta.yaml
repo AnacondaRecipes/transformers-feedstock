@@ -14,7 +14,8 @@ build:
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers=transformers.cli.transformers:main
-  skip: true  # [py<310]
+  # skip 3.14 and up as we don't have safetensors/jax available for it yet
+  skip: true  # [py<310 or py>313]
 
 requirements:
   host:
@@ -269,7 +270,7 @@ about:
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
-  summary: State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow
+  summary: model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.
   description: |
     Transformers provides thousands of pretrained models to perform tasks on different modalities such as text, vision, and audio.
 
