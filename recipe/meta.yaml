@@ -10,12 +10,11 @@ source:
   sha256: 33171c5a932471a56b1e2210e0cba443732d195d03151ce1e538404ad9806052
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers=transformers.cli.transformers:main
-  # skip 3.14 and up as we don't have safetensors/jax available for it yet
-  skip: true  # [py<310 or py>313]
+  skip: true  # [py<310]
 
 requirements:
   host:
@@ -167,6 +166,8 @@ test:
     # Requires cxx compiler
     {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
     {% set skip_tests = skip_tests + " or test_model_generate" %}
+    # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
+    {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
