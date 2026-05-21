@@ -209,5 +209,4 @@ extra:
     - setu4993
     - hadim
     - wietsedv
-  skip-lints:
-    - python_build_tool_in_run
+
