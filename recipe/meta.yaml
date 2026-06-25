@@ -114,6 +114,9 @@ test:
     - parameterized
     - psutil
     - pydantic >=2
+    # 5.9.0 serving CLI eager-imports openai's CompletionCreateParamsStreaming;
+    # `transformers --help` loads it, so the test env needs openai (kept optional in run_constrained)
+    - openai >=1.98.0
     - pytest >=7.2.0,<9.0.0
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
