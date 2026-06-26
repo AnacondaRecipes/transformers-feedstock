@@ -106,6 +106,10 @@ test:
     - pip
     # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
     - pytorch
+    # 5.9.0 tests load vision models (aria) and the Trainer, needing torchvision/accelerate
+    # (both optional for end users, so kept in run_constrained)
+    - torchvision
+    - accelerate >=1.1.0
     # PBP is using the GPU version for some reason:
     - bs4
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
