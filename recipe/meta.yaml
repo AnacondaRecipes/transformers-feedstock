@@ -114,9 +114,13 @@ test:
     - parameterized
     - psutil
     - pydantic >=2
-    # 5.9.0 serving CLI eager-imports openai's CompletionCreateParamsStreaming;
-    # `transformers --help` loads it, so the test env needs openai (kept optional in run_constrained)
+    # 5.9.0's serving CLI defines a class from openai unconditionally, but guards the
+    # import behind is_serve_available() = pydantic AND fastapi AND uvicorn AND openai.
+    # `transformers --help` loads that module, so all four must be in the test env or it
+    # NameErrors. They stay optional (run_constrained) for end users.
     - openai >=1.98.0
+    - fastapi
+    - uvicorn
     - pytest >=7.2.0,<9.0.0
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
