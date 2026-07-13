@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.3.0" %}
+{% set version = "5.9.0" %}
 
 package:
   name: {{ name }}
@@ -7,10 +7,10 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 33171c5a932471a56b1e2210e0cba443732d195d03151ce1e538404ad9806052
+  sha256: aea88fd01ea5344d4e1a8692ee029258de8040381827211a306c3e2be3ace4ac
 
 build:
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers=transformers.cli.transformers:main
@@ -24,11 +24,11 @@ requirements:
     - wheel
   run:
     - python
-    - huggingface_hub >=1.3.0,<2.0
+    - huggingface_hub >=1.5.0,<2.0
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
-    - regex !=2019.12.17
+    - regex >=2025.10.22
     - safetensors >=0.4.3
     - tokenizers >=0.22.0,<=0.23.0
     - tqdm >=4.27
@@ -40,7 +40,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.10.2,<0.11
+    - kernels >=0.12.0,<0.13
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -56,7 +56,7 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.8.8  # [py<314]
+    - mistral-common >=1.10.0  # [py<314]
     # chat_template:
     - jinja2 >=3.1.0
     - jmespath >=1.0.1
@@ -106,6 +106,12 @@ test:
     - pip
     # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
     - pytorch
+    # 5.9.0 tests load vision models (aria) + the Trainer, so the test env needs
+    # torchvision and accelerate. Both are optional for end users: accelerate is bounded
+    # in run_constrained above; torchvision's upstream `vision` extra is unversioned, so a
+    # run_constrained entry would be a no-op — it stays test-only.
+    - torchvision
+    - accelerate >=1.1.0
     # PBP is using the GPU version for some reason:
     - bs4
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
@@ -114,7 +120,17 @@ test:
     - parameterized
     - psutil
     - pydantic >=2
+    # 5.9.0's serving CLI defines a class from openai unconditionally, but guards the
+    # import behind is_serve_available() = pydantic AND fastapi AND uvicorn AND openai.
+    # `transformers --help` loads that module, so all four must be in the test env or it
+    # NameErrors. They stay optional (run_constrained) for end users.
+    - openai >=1.98.0
+    - fastapi
+    - uvicorn
     - pytest >=7.2.0,<9.0.0
+    # 5.9.0's NetworkDebugPlugin registers the xdist hook pytest_configure_node;
+    # without pytest-xdist installed, pytest rejects it (PluginValidationError) at collection
+    - pytest-xdist
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
     - datasets
@@ -149,6 +165,8 @@ test:
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
+    # serving route tests use asyncio.get_event_loop(), removed in Python 3.14
+    {% set ignore_tests = ignore_tests + " --ignore=tests/cli/test_serve.py" %}  # [py>=314]
     #     mode: ValidationMode = ValidationMode.test,
     # E   NameError: name 'ValidationMode' is not defined
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
@@ -178,6 +196,10 @@ test:
     {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
     {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
     {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
+
+    # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
+    {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
+    {% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
 
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
@@ -243,5 +265,3 @@ extra:
     - setu4993
     - hadim
     - wietsedv
-  skip-lints:
-    - python_build_tool_in_run
