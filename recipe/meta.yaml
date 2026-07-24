@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.9.0" %}
+{% set version = "5.14.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: aea88fd01ea5344d4e1a8692ee029258de8040381827211a306c3e2be3ace4ac
+  sha256: 6afa7c63f242ba7058fe609a7afe62b9d63c4262faa61838775b0d50a81ad0da
 
 build:
   number: 0
@@ -29,9 +29,9 @@ requirements:
     - packaging >=20.0
     - pyyaml >=5.1
     - regex >=2025.10.22
-    - safetensors >=0.4.3
+    - safetensors >=0.8.0
     - tokenizers >=0.22.0,<=0.23.0
-    - tqdm >=4.27
+    - tqdm >=4.60
     - typer
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
@@ -40,7 +40,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.12.0,<0.13
+    - kernels >=0.15.2,<0.16
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -56,10 +56,9 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.10.0  # [py<314]
+    - mistral-common >=1.11.5  # [py<314]
     # chat_template:
     - jinja2 >=3.1.0
-    - jmespath >=1.0.1
     # retrieval
     - datasets >=2.15.0
     # sagemaker:
@@ -106,7 +105,7 @@ test:
     - pip
     # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
     - pytorch
-    # 5.9.0 tests load vision models (aria) + the Trainer, so the test env needs
+    # Tests load vision models (aria) + the Trainer, so the test env needs
     # torchvision and accelerate. Both are optional for end users: accelerate is bounded
     # in run_constrained above; torchvision's upstream `vision` extra is unversioned, so a
     # run_constrained entry would be a no-op — it stays test-only.
@@ -120,7 +119,7 @@ test:
     - parameterized
     - psutil
     - pydantic >=2
-    # 5.9.0's serving CLI defines a class from openai unconditionally, but guards the
+    # The serving CLI defines a class from openai unconditionally, but guards the
     # import behind is_serve_available() = pydantic AND fastapi AND uvicorn AND openai.
     # `transformers --help` loads that module, so all four must be in the test env or it
     # NameErrors. They stay optional (run_constrained) for end users.
@@ -128,7 +127,7 @@ test:
     - fastapi
     - uvicorn
     - pytest >=7.2.0,<9.0.0
-    # 5.9.0's NetworkDebugPlugin registers the xdist hook pytest_configure_node;
+    # NetworkDebugPlugin registers the xdist hook pytest_configure_node;
     # without pytest-xdist installed, pytest rejects it (PluginValidationError) at collection
     - pytest-xdist
     - sentencepiece >=0.1.91,!=0.1.92
