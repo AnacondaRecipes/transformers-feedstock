@@ -1,6 +1,0 @@
-# TEMPORARY — remove before merge.
-# transformers 5.14.1 requires safetensors >=0.8.0; pkgs/main is at 0.7.0.
-# Resolve from the green CI of safetensors-feedstock PR #14 (PKG-16348) until it is
-# released to pkgs/main.
-channels:
-  - https://staging.continuum.io/pbp/fs/safetensors-feedstock/pr14/0aeb9876a5d98c4b71f9800c7d483aefdc1d9b02
