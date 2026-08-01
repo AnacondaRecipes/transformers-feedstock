@@ -189,6 +189,10 @@ test:
     {% set skip_tests = skip_tests + " or test_model_generate" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
+    # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
+    # cpu_mkl pytorch 2.10.0 (2.11/2.12 py314 are openblas/mps-only), so the mkl test env
+    # caps at 2.10 and this dispatch test fails validate_environment.
+    {% set skip_tests = skip_tests + " or test_from_config_dispatches_dynamo" %}  # [py>=314]
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
