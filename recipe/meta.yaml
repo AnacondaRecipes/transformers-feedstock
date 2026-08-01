@@ -143,6 +143,10 @@ test:
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
+    # conftest_tests/ (new in 5.14.1) meta-tests HF's repo-root conftest.py CI cache-fallback
+    # harness; pytest resolves `conftest` to tests/cli/conftest.py here, so the patched
+    # _ci_fallback_cache_dir attribute is absent (AttributeError). Tests the CI harness, not transformers.
+    {% set ignore_tests = ignore_tests + " --ignore=tests/conftest_tests" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/deepspeed" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/extended" %}
