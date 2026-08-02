@@ -203,6 +203,10 @@ test:
     {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
     {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
     {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
+    # test_consistent_batching_behaviour downloads microsoft/kosmos-2-patch14-224 from HF Hub;
+    # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
+    # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
@@ -211,8 +215,6 @@ test:
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
