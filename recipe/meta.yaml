@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.9.0" %}
+{% set version = "5.14.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: aea88fd01ea5344d4e1a8692ee029258de8040381827211a306c3e2be3ace4ac
+  sha256: 6afa7c63f242ba7058fe609a7afe62b9d63c4262faa61838775b0d50a81ad0da
 
 build:
   number: 0
@@ -29,9 +29,9 @@ requirements:
     - packaging >=20.0
     - pyyaml >=5.1
     - regex >=2025.10.22
-    - safetensors >=0.4.3
+    - safetensors >=0.8.0
     - tokenizers >=0.22.0,<=0.23.0
-    - tqdm >=4.27
+    - tqdm >=4.60
     - typer
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
@@ -40,7 +40,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.12.0,<0.13
+    - kernels >=0.15.2,<0.16
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -56,10 +56,9 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.10.0  # [py<314]
+    - mistral-common >=1.11.5  # [py<314]
     # chat_template:
     - jinja2 >=3.1.0
-    - jmespath >=1.0.1
     # retrieval
     - datasets >=2.15.0
     # sagemaker:
@@ -106,7 +105,7 @@ test:
     - pip
     # to satisfy `transformers --help` because it raises a warning of missing pytorch/tensorflow for models.
     - pytorch
-    # 5.9.0 tests load vision models (aria) + the Trainer, so the test env needs
+    # Tests load vision models (aria) + the Trainer, so the test env needs
     # torchvision and accelerate. Both are optional for end users: accelerate is bounded
     # in run_constrained above; torchvision's upstream `vision` extra is unversioned, so a
     # run_constrained entry would be a no-op — it stays test-only.
@@ -120,7 +119,7 @@ test:
     - parameterized
     - psutil
     - pydantic >=2
-    # 5.9.0's serving CLI defines a class from openai unconditionally, but guards the
+    # The serving CLI defines a class from openai unconditionally, but guards the
     # import behind is_serve_available() = pydantic AND fastapi AND uvicorn AND openai.
     # `transformers --help` loads that module, so all four must be in the test env or it
     # NameErrors. They stay optional (run_constrained) for end users.
@@ -128,7 +127,7 @@ test:
     - fastapi
     - uvicorn
     - pytest >=7.2.0,<9.0.0
-    # 5.9.0's NetworkDebugPlugin registers the xdist hook pytest_configure_node;
+    # NetworkDebugPlugin registers the xdist hook pytest_configure_node;
     # without pytest-xdist installed, pytest rejects it (PluginValidationError) at collection
     - pytest-xdist
     - sentencepiece >=0.1.91,!=0.1.92
@@ -144,6 +143,10 @@ test:
     # Ignoring tests in all subdirectories.
     {% set ignore_tests = " --ignore=tests/agents" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
+    # conftest_tests/ (new in 5.14.1) meta-tests HF's repo-root conftest.py CI cache-fallback
+    # harness; pytest resolves `conftest` to tests/cli/conftest.py here, so the patched
+    # _ci_fallback_cache_dir attribute is absent (AttributeError). Tests the CI harness, not transformers.
+    {% set ignore_tests = ignore_tests + " --ignore=tests/conftest_tests" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/deepspeed" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/extended" %}
@@ -186,6 +189,10 @@ test:
     {% set skip_tests = skip_tests + " or test_model_generate" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
+    # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
+    # cpu_mkl pytorch 2.10.0 (2.11/2.12 py314 are openblas/mps-only), so the mkl test env
+    # caps at 2.10 and this dispatch test fails validate_environment.
+    {% set skip_tests = skip_tests + " or test_from_config_dispatches_dynamo" %}  # [py>=314]
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
@@ -196,6 +203,10 @@ test:
     {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
     {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
     {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
+    # test_consistent_batching_behaviour downloads microsoft/kosmos-2-patch14-224 from HF Hub;
+    # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
+    # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
+    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
@@ -204,8 +215,6 @@ test:
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
