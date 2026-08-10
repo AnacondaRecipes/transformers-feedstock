@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.14.1" %}
+{% set version = "5.15.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 6afa7c63f242ba7058fe609a7afe62b9d63c4262faa61838775b0d50a81ad0da
+  sha256: cdcba2aa4ed68c60b7136f5e5e11dfd0fa7cbf8697ac54acdb7dba661fae4903
 
 build:
   number: 0
@@ -36,11 +36,11 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.4
+    - pytorch >=2.5
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.15.2,<0.16
+    - kernels >=0.16.0,<0.17
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -56,7 +56,7 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.11.5  # [py<314]
+    - mistral-common >=1.11.7  # [py<314]
     # chat_template:
     - jinja2 >=3.1.0
     # retrieval
