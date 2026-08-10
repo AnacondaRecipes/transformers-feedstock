@@ -187,6 +187,10 @@ test:
     # Requires cxx compiler
     {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
     {% set skip_tests = skip_tests + " or test_model_generate" %}
+    # New in 5.15.0: kernel-loader *_is_compile_safe tests (deepgemm/finegrained_fp8/sonicmoe)
+    # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
+    # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
+    {% set skip_tests = skip_tests + " or is_compile_safe" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
