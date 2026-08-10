@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.14.1" %}
+{% set version = "5.15.0" %}
 
 package:
   name: {{ name }}
@@ -7,14 +7,14 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 6afa7c63f242ba7058fe609a7afe62b9d63c4262faa61838775b0d50a81ad0da
+  sha256: cdcba2aa4ed68c60b7136f5e5e11dfd0fa7cbf8697ac54acdb7dba661fae4903
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - transformers=transformers.cli.transformers:main
-  skip: true  # [py<310]
+  skip: true  # [py<310 or py>314]
 
 requirements:
   host:
@@ -36,11 +36,11 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.4
+    - pytorch >=2.5
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.15.2,<0.16
+    - kernels >=0.16.0,<0.17
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -56,7 +56,7 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.11.5  # [py<314]
+    - mistral-common >=1.11.7  # [py<314]
     # chat_template:
     - jinja2 >=3.1.0
     # retrieval
@@ -174,7 +174,10 @@ test:
     # E   NameError: name 'ValidationMode' is not defined
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
 
-    # These tests require librosa, missing from defaults
+    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
+    # torchcodec on pkgs/main hard-pins `pytorch 2.11 *cpu*`, which conflicts with the test env's
+    # resolved pytorch; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
+    # device-expectation check. Re-enable under a dedicated ticket once the torchcodec/pytorch pin is sorted.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
     {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
@@ -187,6 +190,10 @@ test:
     # Requires cxx compiler
     {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
     {% set skip_tests = skip_tests + " or test_model_generate" %}
+    # New in 5.15.0: kernel-loader *_is_compile_safe tests (deepgemm/finegrained_fp8/sonicmoe)
+    # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
+    # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
+    {% set skip_tests = skip_tests + " or is_compile_safe" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
