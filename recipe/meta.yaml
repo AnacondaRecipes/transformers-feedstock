@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.15.0" %}
+{% set version = "5.15.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: cdcba2aa4ed68c60b7136f5e5e11dfd0fa7cbf8697ac54acdb7dba661fae4903
+  sha256: 1e186d2bd9dc114bc96cb0763e0c95da19842e79b54b2932684733e43fd16bbe
 
 build:
   number: 0
