@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.15.1" %}
+{% set version = "5.16.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 1e186d2bd9dc114bc96cb0763e0c95da19842e79b54b2932684733e43fd16bbe
+  sha256: 4eb6972efd5d57e1bb5f50f40c15e4ad865d7b8d3cc7d0a2f450b82c1d226ce2
 
 build:
   number: 0
@@ -30,7 +30,7 @@ requirements:
     - pyyaml >=5.1
     - regex >=2025.10.22
     - safetensors >=0.8.0
-    - tokenizers >=0.22.0,<=0.23.0
+    - tokenizers >=0.23.1,<0.24.0
     - tqdm >=4.60
     - typer
   run_constrained:
@@ -194,6 +194,10 @@ test:
     # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
     # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
     {% set skip_tests = skip_tests + " or is_compile_safe" %}
+    # New in 5.16.0: DeepGemmForwardTest/FinegrainedFp8ForwardTest assert a FutureWarning for a
+    # deprecated `output_dtype` kwarg, but the deepgemm/finegrained-fp8 kernel path that emits it
+    # isn't taken in the pure-Python test env, so the warning never fires (AssertionError). All Unix platforms.
+    {% set skip_tests = skip_tests + " or ignores_deprecated_output_dtype" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
