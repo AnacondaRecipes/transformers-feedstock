@@ -218,6 +218,10 @@ test:
     # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
     # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
     {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
+    # transformers 5.17.0 upstream bug: the TextToAudio pipeline calls BatchEncoding.to(device, dtype=...),
+    # but BatchEncoding.to() only accepts (device, non_blocking) — TypeError on musicgen/speecht5/vits +
+    # generative kwargs, all platforms where test_pipeline_mixin runs (py<=312, non-win). Skip the class.
+    {% set skip_tests = skip_tests + " or TextToAudioPipelineTests" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
