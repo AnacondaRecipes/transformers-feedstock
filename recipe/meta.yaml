@@ -131,6 +131,10 @@ test:
     # NetworkDebugPlugin registers the xdist hook pytest_configure_node;
     # without pytest-xdist installed, pytest rejects it (PluginValidationError) at collection
     - pytest-xdist
+    # pytest plugins from upstream's testing extra so marked tests actually run
+    # (pytest-asyncio esp.: async tests silently no-op without it)
+    - pytest-asyncio >=1.2.0
+    - pytest-timeout
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
     - datasets
