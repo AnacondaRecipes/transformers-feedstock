@@ -80,11 +80,9 @@ requirements:
 
 test:
   source_files:
-    - tests
-    - conftest.py
-    - pyproject.toml
-    # tests import root helpers test_module + fetch_hub_objects_for_ci from utils/
-    - utils
+    # Whole tree required: tests call direct_transformers_import() which reads src/transformers,
+    # and import root helpers from utils/ — narrowing the copy breaks collection.
+    - .
   imports:
     - transformers
     - transformers.activations
