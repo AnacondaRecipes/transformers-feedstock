@@ -21,7 +21,6 @@ requirements:
     - pip
     - python
     - setuptools
-    - wheel
   run:
     - python
     - huggingface_hub >=1.5.0,<2.0
@@ -56,7 +55,7 @@ requirements:
     # sentencepiece:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
-    - mistral-common >=1.11.7  # [py<314]
+    - mistral-common >=1.11.7
     # chat_template:
     - jinja2 >=3.1.0
     # retrieval
@@ -81,7 +80,9 @@ requirements:
 
 test:
   source_files:
-    - .
+    - tests
+    - conftest.py
+    - pyproject.toml
   imports:
     - transformers
     - transformers.activations
