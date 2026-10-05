@@ -1,0 +1,5 @@
+# huggingface_hub >=1.31 is not on pkgs/main yet (max 1.15.0); resolve it from
+# the PBP graph of huggingface_hub-feedstock#18 (1.33.0, PKG-18272).
+# REMOVE once huggingface_hub >=1.31 is released to pkgs/main.
+channels:
+  - https://package-build.internal.anaconda.com/pkg-orchestrator/v1/channels/graphs/875c7dd9-667b-48ea-b4fa-468c9944376d

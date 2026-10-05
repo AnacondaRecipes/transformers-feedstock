@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.17.0" %}
+{% set version = "5.18.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 472a3712e818d855770bcdc2786f13c27bd0bced66077543e35051a704556227
+  sha256: c424f56596ab15fc3b705b39b9bea6ad41e7d83f3e1c73db085173d2fbc1c0cf
 
 build:
   number: 0
@@ -23,7 +23,7 @@ requirements:
     - setuptools
   run:
     - python
-    - huggingface_hub >=1.5.0,<2.0
+    - huggingface_hub >=1.31.0,<3.0
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
@@ -39,7 +39,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.16.0,<0.17
+    - kernels >=0.17.0,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
