@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.17.0" %}
+{% set version = "5.18.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 472a3712e818d855770bcdc2786f13c27bd0bced66077543e35051a704556227
+  sha256: c424f56596ab15fc3b705b39b9bea6ad41e7d83f3e1c73db085173d2fbc1c0cf
 
 build:
   number: 0
@@ -23,7 +23,7 @@ requirements:
     - setuptools
   run:
     - python
-    - huggingface_hub >=1.5.0,<2.0
+    - huggingface_hub >=1.31.0,<3.0
     - numpy >=1.17
     - packaging >=20.0
     - pyyaml >=5.1
@@ -39,7 +39,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.16.0,<0.17
+    - kernels >=0.17.0,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -223,10 +223,10 @@ test:
     # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
     # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
     {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
-    # transformers 5.17.0 upstream bug: the TextToAudio pipeline calls BatchEncoding.to(device, dtype=...),
-    # but BatchEncoding.to() only accepts (device, non_blocking) — TypeError on musicgen/speecht5/vits +
-    # generative kwargs, all platforms where test_pipeline_mixin runs (py<=312, non-win). Skip the class.
-    {% set skip_tests = skip_tests + " or TextToAudioPipelineTests" %}
+    # 5.18.0 fixed the TextToAudio .to(dtype=) bug (musicgen/speecht5/vits pass again), but
+    # TextToAudioPipelineTests::test_generative_model_kwargs still fails a numeric assertion
+    # (np.False_ is not true) wherever test_pipeline_mixin runs — not the old dtype error. Narrow skip.
+    {% set skip_tests = skip_tests + " or (TextToAudioPipelineTests and test_generative_model_kwargs)" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
