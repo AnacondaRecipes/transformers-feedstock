@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.18.0" %}
+{% set version = "5.19.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: c424f56596ab15fc3b705b39b9bea6ad41e7d83f3e1c73db085173d2fbc1c0cf
+  sha256: 7e34bdf83d66d492035047182df18febe1a5a8cd5071fbd828f308a20f904052
 
 build:
   number: 0
@@ -28,6 +28,9 @@ requirements:
     - packaging >=20.0
     - pyyaml >=5.1
     - regex >=2025.10.22
+    # CLI chat module imports requests unconditionally (loaded by `transformers --help`);
+    # not in upstream install_requires — it used to arrive via huggingface_hub<1.31 (now httpx).
+    - requests
     - safetensors >=0.8.0
     - tokenizers >=0.23.1,<0.24.0
     - tqdm >=4.60
@@ -173,8 +176,6 @@ test:
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
-    # serving route tests use asyncio.get_event_loop(), removed in Python 3.14
-    {% set ignore_tests = ignore_tests + " --ignore=tests/cli/test_serve.py" %}  # [py>=314]
     #     mode: ValidationMode = ValidationMode.test,
     # E   NameError: name 'ValidationMode' is not defined
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
@@ -205,10 +206,6 @@ test:
     {% set skip_tests = skip_tests + " or ignores_deprecated_output_dtype" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
-    # DynamoExporter (new in 5.14.1) requires torch >=2.11; on py3.14 pkgs/main only ships
-    # cpu_mkl pytorch 2.10.0 (2.11/2.12 py314 are openblas/mps-only), so the mkl test env
-    # caps at 2.10 and this dispatch test fails validate_environment.
-    {% set skip_tests = skip_tests + " or test_from_config_dispatches_dynamo" %}  # [py>=314]
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
