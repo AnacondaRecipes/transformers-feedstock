@@ -203,10 +203,6 @@ test:
     # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
     # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
     {% set skip_tests = skip_tests + " or is_compile_safe" %}
-    # New in 5.16.0: DeepGemmForwardTest/FinegrainedFp8ForwardTest assert a FutureWarning for a
-    # deprecated `output_dtype` kwarg, but the deepgemm/finegrained-fp8 kernel path that emits it
-    # isn't taken in the pure-Python test env, so the warning never fires (AssertionError). All Unix platforms.
-    {% set skip_tests = skip_tests + " or ignores_deprecated_output_dtype" %}
     # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
     {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # Tensorboard install conflicts
@@ -223,10 +219,6 @@ test:
     # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
     # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
     {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
-    # 5.18.0 fixed the TextToAudio .to(dtype=) bug (musicgen/speecht5/vits pass again), but
-    # TextToAudioPipelineTests::test_generative_model_kwargs still fails a numeric assertion
-    # (np.False_ is not true) wherever test_pipeline_mixin runs — not the old dtype error. Narrow skip.
-    {% set skip_tests = skip_tests + " or (TextToAudioPipelineTests and test_generative_model_kwargs)" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
