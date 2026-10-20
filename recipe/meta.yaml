@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.19.0" %}
+{% set version = "5.20.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7e34bdf83d66d492035047182df18febe1a5a8cd5071fbd828f308a20f904052
+  sha256: 4b8f798661eff4aa6fbc87a6b1a6d03db30fa681fccb08b0c7afe64d47324fba
 
 build:
   number: 0
@@ -38,11 +38,11 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.5
+    - pytorch >=2.6
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.0,<0.18
+    - kernels >=0.17.2,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -168,6 +168,9 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win or osx]
+    # New in 5.20.0: tests/distributed spawns 4 gloo ranks (mp.spawn) to reshard TP/FSDP checkpoints via
+    # DTensor; same CPU tensor-parallel class as tests/tensor_parallel, so same win/osx treatment.
+    {% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win or osx]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
