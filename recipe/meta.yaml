@@ -221,8 +221,11 @@ test:
     {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
 
+    # TokenClassificationPipelineTests::test_no_offset_tokenizer: CPU device-expectation gap
+    # (ValueError: No matching expectation found for ('cpu', None, None)); fails on every Python
+    # (py3.13/3.14 verified in PR #33 CI once test_pipeline_mixin ran there). Same class as chunking_fast.
+    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
-    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [py<313]
     {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
     # Needs authentification to https://huggingface.co/google/gemma-3-270m-it: 401 Client Error
     {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
