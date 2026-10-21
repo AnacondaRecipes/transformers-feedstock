@@ -47,7 +47,7 @@ requirements:
     - codecarbon >=2.8.1
     # integrations, ray:
     # ray[tune] and sudachipy/sudachidict_core are added upstream only for Python <3.14 (setup.py)
-    - ray >=2.7.0  # [py<314]
+    - ray-tune >=2.7.0  # [py<314]
 
     # Unique pinnings
     # vision:
