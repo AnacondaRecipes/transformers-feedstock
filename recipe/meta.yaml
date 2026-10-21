@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.19.0" %}
+{% set version = "5.20.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7e34bdf83d66d492035047182df18febe1a5a8cd5071fbd828f308a20f904052
+  sha256: 4b8f798661eff4aa6fbc87a6b1a6d03db30fa681fccb08b0c7afe64d47324fba
 
 build:
   number: 0
@@ -38,15 +38,16 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.5
+    - pytorch >=2.6
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.0,<0.18
+    - kernels >=0.17.2,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
-    - ray >=2.7.0
+    # ray[tune] and sudachipy/sudachidict_core are added upstream only for Python <3.14 (setup.py)
+    - ray-tune >=2.7.0  # [py<314]
 
     # Unique pinnings
     # vision:
@@ -70,16 +71,14 @@ requirements:
     # serving:
     - openai >=1.98.0
     - pydantic >=2
-    # benchmark:
-    - optimum-benchmark >=0.3.0
     # ja(Japanese):
     - fugashi >=1.0
     - ipadic >=1.0.0,<2.0
-    - unidic_lite >=1.0.7
+    - unidic-lite >=1.0.7
     - unidic >=1.0.2
     - rhoknp >=1.1.0,<1.3.1
-    - sudachipy >=0.6.6
-    - sudachidict_core >=20220729
+    - sudachipy >=0.6.6  # [py<314]
+    - sudachidict-core >=20220729  # [py<314]
 
 test:
   source_files:
@@ -120,13 +119,13 @@ test:
     # NLTK recent 3.9 release breaks FastSpeechConformer2 tests,
     # see https://github.com/huggingface/transformers/pull/33301
     - nltk <=3.8.1
-    - parameterized
+    # older parameterized breaks pytest collection on .expand (upstream setup.py)
+    - parameterized >=0.9
     - psutil
     - pydantic >=2
-    # The serving CLI defines a class from openai unconditionally, but guards the
-    # import behind is_serve_available() = pydantic AND fastapi AND uvicorn AND openai.
-    # `transformers --help` loads that module, so all four must be in the test env or it
-    # NameErrors. They stay optional (run_constrained) for end users.
+    # Serving deps (pydantic/fastapi/uvicorn/openai): the serve CLI imports them lazily behind
+    # is_serve_available(), so they are only needed here for the tests/cli serve tests.
+    # They stay optional (run_constrained) for end users.
     - openai >=1.98.0
     - fastapi
     - uvicorn
@@ -149,17 +148,12 @@ test:
     - pip check
     - transformers --help
     # Ignoring tests in all subdirectories.
-    {% set ignore_tests = " --ignore=tests/agents" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/benchmark" %}
+    {% set ignore_tests = "" %}
     # conftest_tests/ (new in 5.14.1) meta-tests HF's repo-root conftest.py CI cache-fallback
     # harness; pytest resolves `conftest` to tests/cli/conftest.py here, so the patched
     # _ci_fallback_cache_dir attribute is absent (AttributeError). Tests the CI harness, not transformers.
     {% set ignore_tests = ignore_tests + " --ignore=tests/conftest_tests" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/bettertransformer" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/deepspeed" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/extended" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/fixtures" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/fsdp" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
@@ -168,16 +162,18 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win or osx]
+    # New in 5.20.0: tests/distributed spawns 4 gloo ranks (mp.spawn) to reshard TP/FSDP checkpoints
+    # via DTensor. Passes on linux/osx CPU; Windows unverified, excluded like tests/tensor_parallel.
+    {% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
-    # torch.compile not available until pytorch 2.6; May also Windows CI, see reason below
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [py>312 or win]
+    # Windows CI: see test_executorch reason below
+    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [win]
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
-    #     mode: ValidationMode = ValidationMode.test,
-    # E   NameError: name 'ValidationMode' is not defined
+    # Tests require mistral-common >=1.11.7; pkgs/main currently provides only <=1.11.6.
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
 
     # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
@@ -189,23 +185,13 @@ test:
     {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
     {% set skip_tests = skip_tests + " or pipeline_assisted_generation" %}
     {% set skip_tests = skip_tests + " or test_return_timestamps_ctc_fast" %}
-    {% set skip_tests = skip_tests + " or from_pretrained_low_cpu_mem_usage_measured" %}
     {% set skip_tests = skip_tests + " or test_pipeline_generation_kwargs" %}
-    # pytorch dynamo unsupported on Python 3.12
-    {% set skip_tests = skip_tests + " or warn_if_padding_and_no_attention_mask" %}  # [py>311]
     # Requires cxx compiler
-    {% set skip_tests = skip_tests + " or test_torch_compile_fullgraph" %}
     {% set skip_tests = skip_tests + " or test_model_generate" %}
     # New in 5.15.0: kernel-loader *_is_compile_safe tests (deepgemm/finegrained_fp8/sonicmoe)
     # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
     # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
     {% set skip_tests = skip_tests + " or is_compile_safe" %}
-    # New in 5.16.0: DeepGemmForwardTest/FinegrainedFp8ForwardTest assert a FutureWarning for a
-    # deprecated `output_dtype` kwarg, but the deepgemm/finegrained-fp8 kernel path that emits it
-    # isn't taken in the pure-Python test env, so the warning never fires (AssertionError). All Unix platforms.
-    {% set skip_tests = skip_tests + " or ignores_deprecated_output_dtype" %}
-    # torch.export uses torch._dynamo; PyTorch does not support torch.compile on Python 3.14+ yet
-    {% set skip_tests = skip_tests + " or test_decoder_only_lm_export" %}  # [py>=314]
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
@@ -220,10 +206,6 @@ test:
     # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
     # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
     {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
-    # 5.18.0 fixed the TextToAudio .to(dtype=) bug (musicgen/speecht5/vits pass again), but
-    # TextToAudioPipelineTests::test_generative_model_kwargs still fails a numeric assertion
-    # (np.False_ is not true) wherever test_pipeline_mixin runs — not the old dtype error. Narrow skip.
-    {% set skip_tests = skip_tests + " or (TextToAudioPipelineTests and test_generative_model_kwargs)" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
@@ -238,14 +220,13 @@ test:
     {% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
     {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or test_en_to_de_pt" %}  # [osx]
 
+    # TokenClassificationPipelineTests::test_no_offset_tokenizer: CPU device-expectation gap
+    # (ValueError: No matching expectation found for ('cpu', None, None)); fails on every Python
+    # (py3.13/3.14 verified in PR #33 CI once test_pipeline_mixin ran there). Same class as chunking_fast.
+    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
-    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}  # [py<313]
     {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
-    {% set skip_tests = skip_tests + " or test_pt_ignore_subwords_slow_tokenizer_raises" %}  # [py<313]
-    # Missing dependencies for the serving CLI
-    {% set skip_tests = skip_tests + " or test_healthcheck" %}
     # Needs authentification to https://huggingface.co/google/gemma-3-270m-it: 401 Client Error
     {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
     # Module not found "phonemizer"
@@ -257,7 +238,6 @@ test:
     # problematic compatibility with pytorch 2.8 on osx-metal (GPU). Higher pytorch versions available for
     # python 3.12 and up. Skipping those tests is more reasonable than switching to CPU.
     {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
-    {% set skip_tests = skip_tests + " or test_small_chat_model_with_response_parsing" %}  # [osx and py<312]
     {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
