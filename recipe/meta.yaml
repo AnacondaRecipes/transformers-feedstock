@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.19.0" %}
+{% set version = "5.20.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7e34bdf83d66d492035047182df18febe1a5a8cd5071fbd828f308a20f904052
+  sha256: 5a6b684fb12f97031a45f1af21ab69484d2535af415740c590b99ce5160b4df6
 
 build:
   number: 0
@@ -38,11 +38,11 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.5
+    - pytorch >=2.6
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.0,<0.18
+    - kernels >=0.17.2,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -259,6 +259,10 @@ test:
     {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
     {% set skip_tests = skip_tests + " or test_small_chat_model_with_response_parsing" %}  # [osx and py<312]
     {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
+
+    # AttributeError: module 'torch.mps' has no attribute 'is_initialized'
+    {% set skip_tests = skip_tests + " or test_pp_weight_loading_0" %}  # [osx]
+    {% set skip_tests = skip_tests + " or test_pp_generation_0" %}  # [osx]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
