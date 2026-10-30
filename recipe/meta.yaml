@@ -38,11 +38,11 @@ requirements:
   run_constrained:
     # Shared pinnings (avoid build errors due to duplicates):
     # torch, serving:
-    - pytorch >=2.5
+    - pytorch >=2.6
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.0,<0.18
+    - kernels >=0.17.2,<0.18
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -259,6 +259,10 @@ test:
     {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
     {% set skip_tests = skip_tests + " or test_small_chat_model_with_response_parsing" %}  # [osx and py<312]
     {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
+
+    # AttributeError: module 'torch.mps' has no attribute 'is_initialized'
+    {% set skip_tests = skip_tests + " or test_pp_weight_loading_0" %}  # [osx]
+    {% set skip_tests = skip_tests + " or test_pp_generation_0" %}  # [osx]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
