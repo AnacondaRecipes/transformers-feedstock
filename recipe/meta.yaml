@@ -1,14 +1,13 @@
 {% set name = "transformers" %}
-{% set version = "5.21.0" %}
+{% set version = "5.22.1" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  # Upstream tagged 5.21.0 as "v5.21" (no patch component); other versions use v{{ version }}.
-  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/{{ "v5.21" if version == "5.21.0" else "v" ~ version }}.tar.gz
-  sha256: a3f3f7cf0110434ee061513fb75710880e2761c35ba8746179d21340f81b3b83
+  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 35342e69bdd74964807c012aad54cccd77e8867712c944355c7cb26f2dcd9957
 
 build:
   number: 0
@@ -177,8 +176,8 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
 
     # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
-    # torchcodec on pkgs/main hard-pins `pytorch 2.11 *cpu*`, which conflicts with the test env's
-    # resolved pytorch; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
+    # torchcodec on pkgs/main pins `pytorch 2.13 *cpu*` (newest build), which conflicts with the test env's
+    # resolved pytorch 2.14.1; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
     # device-expectation check. Re-enable under a dedicated ticket once the torchcodec/pytorch pin is sorted.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
@@ -202,10 +201,6 @@ test:
     {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
     {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
     {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
-    # test_consistent_batching_behaviour downloads microsoft/kosmos-2-patch14-224 from HF Hub;
-    # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
-    # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
 
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
@@ -235,10 +230,6 @@ test:
     {% set skip_tests = skip_tests + " or test_cli_download" %}
     # TypeError: iteration over a 0-d array
     {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
-    # problematic compatibility with pytorch 2.8 on osx-metal (GPU). Higher pytorch versions available for
-    # python 3.12 and up. Skipping those tests is more reasonable than switching to CPU.
-    {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
-    {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
