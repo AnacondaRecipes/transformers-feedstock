@@ -1,14 +1,13 @@
 {% set name = "transformers" %}
-{% set version = "5.21.0" %}
+{% set version = "5.22.1" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  # Upstream tagged 5.21.0 as "v5.21" (no patch component); other versions use v{{ version }}.
-  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/{{ "v5.21" if version == "5.21.0" else "v" ~ version }}.tar.gz
-  sha256: a3f3f7cf0110434ee061513fb75710880e2761c35ba8746179d21340f81b3b83
+  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 35342e69bdd74964807c012aad54cccd77e8867712c944355c7cb26f2dcd9957
 
 build:
   number: 0
