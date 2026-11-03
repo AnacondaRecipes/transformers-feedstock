@@ -1,5 +1,57 @@
 {% set name = "transformers" %}
-{% set version = "5.21.0" %}
+{% set version = "5.22.1" %}
+{% set ignore_tests = "" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/conftest_tests" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/fixtures" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win or osx]
+{% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win]
+{% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [win]
+{% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
+{% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
+{% set skip_tests = "return_timestamps_ctc_fast" %}
+{% set skip_tests = skip_tests + " or chunking_fast" %}
+{% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
+{% set skip_tests = skip_tests + " or pipeline_assisted_generation" %}
+{% set skip_tests = skip_tests + " or test_return_timestamps_ctc_fast" %}
+{% set skip_tests = skip_tests + " or test_pipeline_generation_kwargs" %}
+{% set skip_tests = skip_tests + " or test_model_generate" %}
+{% set skip_tests = skip_tests + " or is_compile_safe" %}
+{% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
+{% set skip_tests = skip_tests + " or small_model_pt" %}
+{% set skip_tests = skip_tests + " or small_model_pt_fp16" %}
+{% set skip_tests = skip_tests + " or small_model_pt_seq2seq" %}
+{% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
+{% set skip_tests = skip_tests + " or return_dict_in_generate" %}
+{% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
+{% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
+{% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
+{% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
+{% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
+{% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}
+{% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
+{% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
+{% set skip_tests = skip_tests + " or test_forward_model_kwargs" %}
+{% set skip_tests = skip_tests + " or test_cli_download" %}
+{% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
+{% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
+{% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
 
 package:
   name: {{ name }}
@@ -8,7 +60,7 @@ package:
 source:
   # Upstream tagged 5.21.0 as "v5.21" (no patch component); other versions use v{{ version }}.
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/{{ "v5.21" if version == "5.21.0" else "v" ~ version }}.tar.gz
-  sha256: a3f3f7cf0110434ee061513fb75710880e2761c35ba8746179d21340f81b3b83
+  sha256: 35342e69bdd74964807c012aad54cccd77e8867712c944355c7cb26f2dcd9957
 
 build:
   number: 0
@@ -46,7 +98,6 @@ requirements:
     # integrations, ray:
     # ray[tune] and sudachipy/sudachidict_core are added upstream only for Python <3.14 (setup.py)
     - ray-tune >=2.7.0  # [py<314]
-
     # Unique pinnings
     # vision:
     - pillow >=10.0.1,<=15.0
@@ -138,7 +189,7 @@ test:
     - sentencepiece >=0.1.91,!=0.1.92
     - rich
     - datasets
-  # Undeclared as testing deps
+    # Undeclared as testing deps
     - pillow
     - protobuf
   commands:
@@ -148,98 +199,40 @@ test:
     - python -c "import transformers; assert transformers.__version__ == '{{ version }}', transformers.__version__"
     - transformers --help
     # Ignoring tests in all subdirectories.
-    {% set ignore_tests = "" %}
     # conftest_tests/ (new in 5.14.1) meta-tests HF's repo-root conftest.py CI cache-fallback
     # harness; pytest resolves `conftest` to tests/cli/conftest.py here, so the patched
     # _ci_fallback_cache_dir attribute is absent (AttributeError). Tests the CI harness, not transformers.
-    {% set ignore_tests = ignore_tests + " --ignore=tests/conftest_tests" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/fixtures" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/tensor_parallel" %}  #  [win or osx]
     # New in 5.20.0: tests/distributed spawns 4 gloo ranks (mp.spawn) to reshard TP/FSDP checkpoints
     # via DTensor. Passes on linux/osx CPU; Windows unverified, excluded like tests/tensor_parallel.
-    {% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win]
-    {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
     # Windows CI: see test_executorch reason below
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_pipeline_mixin.py" %}  # [win]
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
     # Tests require mistral-common >=1.11.7; pkgs/main currently provides only <=1.11.6.
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
-
     # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
     # torchcodec on pkgs/main hard-pins `pytorch 2.11 *cpu*`, which conflicts with the test env's
     # resolved pytorch; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
     # device-expectation check. Re-enable under a dedicated ticket once the torchcodec/pytorch pin is sorted.
-    {% set skip_tests = "return_timestamps_ctc_fast" %}
-    {% set skip_tests = skip_tests + " or chunking_fast" %}
-    {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
-    {% set skip_tests = skip_tests + " or pipeline_assisted_generation" %}
-    {% set skip_tests = skip_tests + " or test_return_timestamps_ctc_fast" %}
-    {% set skip_tests = skip_tests + " or test_pipeline_generation_kwargs" %}
     # Requires cxx compiler
-    {% set skip_tests = skip_tests + " or test_model_generate" %}
     # New in 5.15.0: kernel-loader *_is_compile_safe tests (deepgemm/finegrained_fp8/sonicmoe)
     # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
     # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
-    {% set skip_tests = skip_tests + " or is_compile_safe" %}
     # Tensorboard install conflicts
-    {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
-
     # Small floating point rounding errors.
-    {% set skip_tests = skip_tests + " or small_model_pt" %}
-    {% set skip_tests = skip_tests + " or small_model_pt_fp16" %}
-    {% set skip_tests = skip_tests + " or small_model_pt_seq2seq" %}
-    {% set skip_tests = skip_tests + " or torch_float16_pipeline" %}
-    {% set skip_tests = skip_tests + " or return_dict_in_generate" %}
-    {% set skip_tests = skip_tests + " or stop_sequence_stopping_criteria" %}
     # test_consistent_batching_behaviour downloads microsoft/kosmos-2-patch14-224 from HF Hub;
     # the download intermittently hits a brotlicffi 1.2.0.0 decoder bug in httpx (DecodingError →
     # tokenizer load OSError), failing across platforms. Not a packaging issue — skip everywhere.
-    {% set skip_tests = skip_tests + " or consistent_batching_behaviour" %}
-
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
-    {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
-    {% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
-
     # Require Mac OS 14
-    {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or pipeline_length_setting_warning" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or small_chat_model_continue_final_message_override" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or small_chat_model_pt" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or small_chat_model_with_dataset_pt" %}  # [osx and arm64]
-    {% set skip_tests = skip_tests + " or small_chat_model_with_iterator_pt" %}  # [osx and arm64]
-
     # TokenClassificationPipelineTests::test_no_offset_tokenizer: CPU device-expectation gap
     # (ValueError: No matching expectation found for ('cpu', None, None)); fails on every Python
     # (py3.13/3.14 verified in PR #33 CI once test_pipeline_mixin ran there). Same class as chunking_fast.
-    {% set skip_tests = skip_tests + " or test_no_offset_tokenizer" %}
     # TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
-    {% set skip_tests = skip_tests + " or test_pipeline_length_setting_warning" %}  # [py<313]
     # Needs authentification to https://huggingface.co/google/gemma-3-270m-it: 401 Client Error
-    {% set skip_tests = skip_tests + " or test_pipeline_skip_special_tokens" %}
     # Module not found "phonemizer"
-    {% set skip_tests = skip_tests + " or test_forward_model_kwargs" %}
     # ValueError: I/O operation on closed file.
-    {% set skip_tests = skip_tests + " or test_cli_download" %}
     # TypeError: iteration over a 0-d array
-    {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
     # problematic compatibility with pytorch 2.8 on osx-metal (GPU). Higher pytorch versions available for
     # python 3.12 and up. Skipping those tests is more reasonable than switching to CPU.
-    {% set skip_tests = skip_tests + " or test_forward_tokenizer_kwargs" %}  # [osx and py<312]
-    {% set skip_tests = skip_tests + " or test_generative_model_kwargs" %}  # [osx and py<312]
-
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
 about:
