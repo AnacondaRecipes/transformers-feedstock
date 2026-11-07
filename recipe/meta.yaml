@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.22.1" %}
+{% set version = "5.22.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 35342e69bdd74964807c012aad54cccd77e8867712c944355c7cb26f2dcd9957
+  sha256: 389249c5ac63ce3df436d8f50e42bbaefbb691ffad41023b9de811fc30be9728
 
 build:
   number: 0
@@ -58,7 +58,7 @@ requirements:
     # mistral-common:
     - mistral-common >=1.11.7
     # chat_template:
-    - jinja2 >=3.1.0
+    - jinja2 >=3.1.6
     # retrieval
     - datasets >=2.15.0
     # sagemaker:
@@ -135,6 +135,11 @@ test:
     - pytest-asyncio >=1.2.0
     - pytest-timeout
     - sentencepiece >=0.1.91,!=0.1.92
+    # upstream testing extra; runs tests/test_tokenization_mistral_common.py
+    - mistral-common >=1.11.7
+    # mistral-common's `audio` extra (soundfile + soxr), needed by its audio tokenizer tests
+    - pysoundfile >=0.12.1
+    - soxr-python >=0.5.0
     - rich
     - datasets
   # Undeclared as testing deps
@@ -172,13 +177,20 @@ test:
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
-    # Tests require mistral-common >=1.11.7; pkgs/main currently provides only <=1.11.6.
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
+    # The test file swaps mistral-common's download_image for transformers' load_image(image=...), but
+    # mistral-common 1.12.0 now calls download_image(url=...) -> TypeError. Test-harness mismatch only.
+    {% set mc = " --deselect tests/test_tokenization_mistral_common.py::TestMistralCommonBackend::" %}
+    # --deselect matches node-ID prefixes, so it is used only for names no other test starts with;
+    # test_batch_apply_chat_template (same TypeError) is excluded by exact keyword in skip_tests below.
+    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template_images" %}
+    # Loads audio from a URL via transformers' load_audio_as, which needs librosa (upstream `audio` extra). Not a
+    # test dependency here: installing it would switch on many currently-skipped audio tests across the suite.
+    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_audio" %}
 
-    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
-    # torchcodec on pkgs/main pins `pytorch 2.13 *cpu*` (newest build), which conflicts with the test env's
-    # resolved pytorch 2.14.1; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
-    # device-expectation check. Re-enable under a dedicated ticket once the torchcodec/pytorch pin is sorted.
+    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it), and
+    # torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
+    # (torchcodec 0.17.0 matches the test env's pytorch 2.15); re-enable under a dedicated ticket.
+    # TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU device-expectation check.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
     {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
@@ -230,6 +242,8 @@ test:
     {% set skip_tests = skip_tests + " or test_cli_download" %}
     # TypeError: iteration over a 0-d array
     {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
+    # mistral-common image TypeError (see deselects above); exact match keeps its 8 test_batch_apply_chat_template_* siblings
+    {% set skip_tests = skip_tests + " or (TestMistralCommonBackend and test_batch_apply_chat_template and not test_batch_apply_chat_template_)" %}
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
