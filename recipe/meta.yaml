@@ -137,6 +137,9 @@ test:
     - sentencepiece >=0.1.91,!=0.1.92
     # upstream testing extra; runs tests/test_tokenization_mistral_common.py
     - mistral-common >=1.11.7
+    # mistral-common's `audio` extra (soundfile + soxr), needed by its audio tokenizer tests
+    - pysoundfile >=0.12.1
+    - soxr-python >=0.5.0
     - rich
     - datasets
   # Undeclared as testing deps
@@ -174,6 +177,10 @@ test:
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
+    # The test file swaps mistral-common's download_image for transformers' load_image(image=...), but
+    # mistral-common 1.12.0 now calls download_image(url=...) -> TypeError. Test-harness mismatch only.
+    {% set mc = " --deselect tests/test_tokenization_mistral_common.py::TestMistralCommonBackend::" %}
+    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template" + mc + "test_batch_apply_chat_template_images" %}
 
     # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it), and
     # torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
