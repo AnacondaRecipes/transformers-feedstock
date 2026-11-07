@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.22.1" %}
+{% set version = "5.22.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 35342e69bdd74964807c012aad54cccd77e8867712c944355c7cb26f2dcd9957
+  sha256: 389249c5ac63ce3df436d8f50e42bbaefbb691ffad41023b9de811fc30be9728
 
 build:
   number: 0
@@ -58,7 +58,7 @@ requirements:
     # mistral-common:
     - mistral-common >=1.11.7
     # chat_template:
-    - jinja2 >=3.1.0
+    - jinja2 >=3.1.6
     # retrieval
     - datasets >=2.15.0
     # sagemaker:
