@@ -135,6 +135,8 @@ test:
     - pytest-asyncio >=1.2.0
     - pytest-timeout
     - sentencepiece >=0.1.91,!=0.1.92
+    # upstream testing extra; runs tests/test_tokenization_mistral_common.py
+    - mistral-common >=1.11.7
     - rich
     - datasets
   # Undeclared as testing deps
@@ -172,13 +174,11 @@ test:
     # [Windows] Upstream bug where non-CUDA machines (CI) fail to correctly skip CUDA test on Windows
     # fatal exception: access violation
     {% set ignore_tests = ignore_tests + " --ignore=tests/test_executorch.py" %}  # [win]
-    # Tests require mistral-common >=1.11.7; pkgs/main currently provides only <=1.11.6.
-    {% set ignore_tests = ignore_tests + " --ignore=tests/test_tokenization_mistral_common.py" %}
 
-    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it).
-    # torchcodec on pkgs/main pins `pytorch 2.13 *cpu*` (newest build), which conflicts with the test env's
-    # resolved pytorch 2.14.1; TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU
-    # device-expectation check. Re-enable under a dedicated ticket once the torchcodec/pytorch pin is sorted.
+    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it), and
+    # torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
+    # (torchcodec 0.17.0 matches the test env's pytorch 2.15); re-enable under a dedicated ticket.
+    # TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU device-expectation check.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
     {% set skip_tests = skip_tests + " or chunking_fast" %}
     {% set skip_tests = skip_tests + " or input_parameter_passthrough" %}
