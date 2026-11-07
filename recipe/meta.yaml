@@ -180,7 +180,9 @@ test:
     # The test file swaps mistral-common's download_image for transformers' load_image(image=...), but
     # mistral-common 1.12.0 now calls download_image(url=...) -> TypeError. Test-harness mismatch only.
     {% set mc = " --deselect tests/test_tokenization_mistral_common.py::TestMistralCommonBackend::" %}
-    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template" + mc + "test_batch_apply_chat_template_images" %}
+    # --deselect matches node-ID prefixes, so it is used only for names no other test starts with;
+    # test_batch_apply_chat_template (same TypeError) is excluded by exact keyword in skip_tests below.
+    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template_images" %}
     # Loads audio from a URL via transformers' load_audio_as, which needs librosa (upstream `audio` extra). Not a
     # test dependency here: installing it would switch on many currently-skipped audio tests across the suite.
     {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_audio" %}
@@ -240,6 +242,8 @@ test:
     {% set skip_tests = skip_tests + " or test_cli_download" %}
     # TypeError: iteration over a 0-d array
     {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
+    # mistral-common image TypeError (see deselects above); exact match keeps its 8 test_batch_apply_chat_template_* siblings
+    {% set skip_tests = skip_tests + " or (TestMistralCommonBackend and test_batch_apply_chat_template and not test_batch_apply_chat_template_)" %}
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
