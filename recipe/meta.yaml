@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.22.2" %}
+{% set version = "5.23.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 389249c5ac63ce3df436d8f50e42bbaefbb691ffad41023b9de811fc30be9728
+  sha256: c7fb46141acca1281c159b3ac820ac4b1dbed049bb9997a2076b6d9eec769ba8
 
 build:
   number: 0
@@ -39,7 +39,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.2,<0.18
+    - kernels >=0.18.2,<0.19
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -50,7 +50,8 @@ requirements:
     # vision:
     - pillow >=10.0.1,<=15.0
     # audio:
-    - pyctcdecode >=0.4.0
+    - pysoundfile >=0.13.0
+    - soxr-python >=0.5.0
     # timm:
     - timm >=1.0.23
     # sentencepiece:
@@ -137,8 +138,8 @@ test:
     - sentencepiece >=0.1.91,!=0.1.92
     # upstream testing extra; runs tests/test_tokenization_mistral_common.py
     - mistral-common >=1.11.7
-    # mistral-common's `audio` extra (soundfile + soxr), needed by its audio tokenizer tests
-    - pysoundfile >=0.12.1
+    # upstream `audio` extra (soundfile + soxr): transformers' audio loading and mistral-common's audio tests
+    - pysoundfile >=0.13.0
     - soxr-python >=0.5.0
     - rich
     - datasets
@@ -183,12 +184,9 @@ test:
     # --deselect matches node-ID prefixes, so it is used only for names no other test starts with;
     # test_batch_apply_chat_template (same TypeError) is excluded by exact keyword in skip_tests below.
     {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template_images" %}
-    # Loads audio from a URL via transformers' load_audio_as, which needs librosa (upstream `audio` extra). Not a
-    # test dependency here: installing it would switch on many currently-skipped audio tests across the suite.
-    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_audio" %}
 
-    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it), and
-    # torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
+    # Audio-pipeline tests: they read audio through the datasets Audio feature, which decodes via torchcodec
+    # (ImportError without it), and torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
     # (torchcodec 0.17.0 matches the test env's pytorch 2.15); re-enable under a dedicated ticket.
     # TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU device-expectation check.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
