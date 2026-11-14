@@ -225,6 +225,9 @@ test:
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
     {% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
+    # New in 5.23.0: the tiny-Llava beam-search test hits a PyTorch oneDNN error on linux-aarch64 only
+    # ("could not create a primitive descriptor for the matmul primitive"); the AnyToAny twin passes
+    {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_multiple_candidates_tiny_model)" %}  # [aarch64]
 
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
