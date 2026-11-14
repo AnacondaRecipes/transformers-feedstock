@@ -1,5 +1,5 @@
 {% set name = "transformers" %}
-{% set version = "5.22.2" %}
+{% set version = "5.23.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 389249c5ac63ce3df436d8f50e42bbaefbb691ffad41023b9de811fc30be9728
+  sha256: c7fb46141acca1281c159b3ac820ac4b1dbed049bb9997a2076b6d9eec769ba8
 
 build:
   number: 0
@@ -39,7 +39,7 @@ requirements:
     # torch, accelerate, deepspeed, serving:
     - accelerate >=1.1.0
     # kernels, integrations:
-    - kernels >=0.17.2,<0.18
+    - kernels >=0.18.2,<0.19
     # integrations, codecarbon:
     - codecarbon >=2.8.1
     # integrations, ray:
@@ -50,7 +50,8 @@ requirements:
     # vision:
     - pillow >=10.0.1,<=15.0
     # audio:
-    - pyctcdecode >=0.4.0
+    - pysoundfile >=0.13.0
+    - soxr-python >=0.5.0
     # timm:
     - timm >=1.0.23
     # sentencepiece:
@@ -137,8 +138,8 @@ test:
     - sentencepiece >=0.1.91,!=0.1.92
     # upstream testing extra; runs tests/test_tokenization_mistral_common.py
     - mistral-common >=1.11.7
-    # mistral-common's `audio` extra (soundfile + soxr), needed by its audio tokenizer tests
-    - pysoundfile >=0.12.1
+    # upstream `audio` extra (soundfile + soxr): transformers' audio loading and mistral-common's audio tests
+    - pysoundfile >=0.13.0
     - soxr-python >=0.5.0
     - rich
     - datasets
@@ -161,7 +162,12 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/generation" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
-    {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}
+    # Pipeline tests used to run via test_pipeline_mixin.py's module-level imports; 5.23.0 loads them lazily, so
+    # collect tests/pipelines directly. Windows skips them, like the mixin below; the 4 modules the mixin never
+    # imported stay out, keeping the previous coverage.
+    {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}  # [win]
+    {% set pl = " --ignore=tests/pipelines/test_pipelines_" %}
+    {% set ignore_tests = ignore_tests + pl + "common.py" + pl + "decision.py" + pl + "keypoint_matching.py" + pl + "question_answering.py" %}  # [not win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
@@ -169,6 +175,9 @@ test:
     # New in 5.20.0: tests/distributed spawns 4 gloo ranks (mp.spawn) to reshard TP/FSDP checkpoints
     # via DTensor. Passes on linux/osx CPU; Windows unverified, excluded like tests/tensor_parallel.
     {% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win]
+    # New in 5.23.0: the expert-parallel tests' run_distributed helper builds dist.TCPStore without use_libuv=False,
+    # and no Windows PyTorch has the TCPStore libuv backend (DistStoreError).
+    {% set ignore_tests = ignore_tests + " --ignore=tests/expert_parallel" %}  # [win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
@@ -183,12 +192,9 @@ test:
     # --deselect matches node-ID prefixes, so it is used only for names no other test starts with;
     # test_batch_apply_chat_template (same TypeError) is excluded by exact keyword in skip_tests below.
     {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_image" + mc + "test_batch_apply_chat_template_images" %}
-    # Loads audio from a URL via transformers' load_audio_as, which needs librosa (upstream `audio` extra). Not a
-    # test dependency here: installing it would switch on many currently-skipped audio tests across the suite.
-    {% set ignore_tests = ignore_tests + mc + "test_apply_chat_template_with_audio" %}
 
-    # Audio-pipeline tests: recent transformers decodes audio via torchcodec (ImportError without it), and
-    # torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
+    # Audio-pipeline tests: they read audio through the datasets Audio feature, which decodes via torchcodec
+    # (ImportError without it), and torchcodec is not in test.requires (upstream's testing extra omits it). Its old pytorch-pin conflict is gone
     # (torchcodec 0.17.0 matches the test env's pytorch 2.15); re-enable under a dedicated ticket.
     # TokenClassificationPipelineTests::test_chunking_fast additionally fails a CPU device-expectation check.
     {% set skip_tests = "return_timestamps_ctc_fast" %}
@@ -203,6 +209,8 @@ test:
     # call torch._inductor, which needs a working C++ compiler on PATH. The pure-Python test env
     # has no gxx (torch's TORCH_INDUCTOR_INSTALL_GXX self-install is off) — same class as test_torch_compile_fullgraph.
     {% set skip_tests = skip_tests + " or is_compile_safe" %}
+    # New in 5.23.0, same class: GroupedMmFallbackCompileTest runs torch.compile(fullgraph=True)
+    {% set skip_tests = skip_tests + " or test_forward_backward_fullgraph" %}
     # Tensorboard install conflicts
     {% set skip_tests = skip_tests + " or test_word_heuristic_leading_space" %}
 
@@ -217,6 +225,9 @@ test:
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
     {% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
+    # New in 5.23.0: the tiny-Llava beam-search test hits a PyTorch oneDNN error on linux-aarch64 only
+    # ("could not create a primitive descriptor for the matmul primitive"); the AnyToAny twin passes
+    {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_multiple_candidates_tiny_model)" %}  # [aarch64]
 
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
