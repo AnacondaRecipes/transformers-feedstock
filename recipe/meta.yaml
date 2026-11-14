@@ -58,6 +58,8 @@ requirements:
     - sentencepiece >=0.1.91,!=0.1.92
     # mistral-common:
     - mistral-common >=1.11.7
+    # peft (no upstream extra): the PEFT integration raises below MIN_PEFT_VERSION (integrations/peft.py)
+    - peft >=0.20.0
     # chat_template:
     - jinja2 >=3.1.6
     # retrieval
@@ -148,6 +150,9 @@ test:
     - protobuf
   commands:
     - export PYTORCH_ENABLE_MPS_FALLBACK=1  # [osx]
+    # upstream sets this default via pytest-env (pyproject.toml), which is not on pkgs/main
+    - export HF_HUB_DOWNLOAD_TIMEOUT=60  # [unix]
+    - set HF_HUB_DOWNLOAD_TIMEOUT=60  # [win]
     - pip check
     # Guards against the source archive and the package version drifting apart.
     - python -c "import transformers; assert transformers.__version__ == '{{ version }}', transformers.__version__"
@@ -163,11 +168,11 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=tests/models" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/peft_integration" %}
     # Pipeline tests used to run via test_pipeline_mixin.py's module-level imports; 5.23.0 loads them lazily, so
-    # collect tests/pipelines directly. Windows skips them, like the mixin below; the 4 modules the mixin never
-    # imported stay out, keeping the previous coverage.
+    # collect tests/pipelines directly. Windows skips them, like the mixin below; the 3 modules the 5.22.2 mixin
+    # never imported stay out, keeping the previous coverage.
     {% set ignore_tests = ignore_tests + " --ignore=tests/pipelines" %}  # [win]
     {% set pl = " --ignore=tests/pipelines/test_pipelines_" %}
-    {% set ignore_tests = ignore_tests + pl + "common.py" + pl + "decision.py" + pl + "keypoint_matching.py" + pl + "question_answering.py" %}  # [not win]
+    {% set ignore_tests = ignore_tests + pl + "common.py" + pl + "keypoint_matching.py" + pl + "question_answering.py" %}  # [not win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/quantization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/repo_utils" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/sagemaker" %}
@@ -175,9 +180,6 @@ test:
     # New in 5.20.0: tests/distributed spawns 4 gloo ranks (mp.spawn) to reshard TP/FSDP checkpoints
     # via DTensor. Passes on linux/osx CPU; Windows unverified, excluded like tests/tensor_parallel.
     {% set ignore_tests = ignore_tests + " --ignore=tests/distributed" %}  #  [win]
-    # New in 5.23.0: the expert-parallel tests' run_distributed helper builds dist.TCPStore without use_libuv=False,
-    # and no Windows PyTorch has the TCPStore libuv backend (DistStoreError).
-    {% set ignore_tests = ignore_tests + " --ignore=tests/expert_parallel" %}  # [win]
     {% set ignore_tests = ignore_tests + " --ignore=tests/tokenization" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/trainer" %}
     {% set ignore_tests = ignore_tests + " --ignore=tests/utils" %}
@@ -255,6 +257,14 @@ test:
     {% set skip_tests = skip_tests + " or test_slow_tokenizer_sqa_pt" %}
     # mistral-common image TypeError (see deselects above); exact match keeps its 8 test_batch_apply_chat_template_* siblings
     {% set skip_tests = skip_tests + " or (TestMistralCommonBackend and test_batch_apply_chat_template and not test_batch_apply_chat_template_)" %}
+    # New in 5.23.0: these expert-parallel tests go through run_distributed, which builds dist.TCPStore without
+    # use_libuv=False, and no Windows PyTorch has the TCPStore libuv backend (DistStoreError). The file's
+    # single-process tests still run.
+    {% set skip_tests = skip_tests + " or test_dispatch_hands_experts_the_received_rows" %}  # [win]
+    {% set skip_tests = skip_tests + " or test_ep_implementation_matches_one_process" %}  # [win]
+    {% set skip_tests = skip_tests + " or test_auto_ep_picks_all_reduce_only_at_inference_on_a_shared_batch" %}  # [win]
+    {% set skip_tests = skip_tests + " or test_install_forward_checks_ep_implementation" %}  # [win]
+    {% set skip_tests = skip_tests + " or test_megamoe_hands_experts_a_slice_of_the_shared_batch" %}  # [win]
 
     - pytest tests -k "not ({{ skip_tests }})" {{ ignore_tests }}
 
