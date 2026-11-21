@@ -230,6 +230,9 @@ test:
     # New in 5.23.0: the tiny-Llava beam-search test hits a PyTorch oneDNN error on linux-aarch64 only
     # ("could not create a primitive descriptor for the matmul primitive"); the AnyToAny twin passes
     {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_multiple_candidates_tiny_model)" %}  # [aarch64]
+    # New in 5.24.0: two more tiny-Llava tests hit the same oneDNN error (matmul / convolution primitive)
+    {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_return_tensors_with_chat_input)" %}  # [aarch64]
+    {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_generate_kwargs_not_mutated_tiny_llava)" %}  # [aarch64]
 
     # Require Mac OS 14
     {% set skip_tests = skip_tests + " or return_timestamps_in_init" %}  # [osx and arm64]
