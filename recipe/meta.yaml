@@ -60,6 +60,8 @@ requirements:
     - mistral-common >=1.11.7
     # peft (no upstream extra): the PEFT integration raises below MIN_PEFT_VERSION (integrations/peft.py)
     - peft >=0.22.0
+    # bitsandbytes (no upstream extra): the 4-/8-bit quantizers raise below BITSANDBYTES_MIN_VERSION (utils/import_utils.py)
+    - bitsandbytes >=0.46.1
     # chat_template:
     - jinja2 >=3.1.6
     # retrieval
@@ -227,10 +229,11 @@ test:
     # bf16/fp16 pipeline scores differ slightly on linux-aarch64 (osx-arm64 handled above)
     {% set skip_tests = skip_tests + " or torch_bfloat16_pipeline" %}  # [aarch64]
     {% set skip_tests = skip_tests + " or accepts_torch_fp16" %}  # [aarch64]
-    # New in 5.23.0: the tiny-Llava beam-search test hits a PyTorch oneDNN error on linux-aarch64 only
-    # ("could not create a primitive descriptor for the matmul primitive"); the AnyToAny twin passes
+    # tiny-Llava tests (one new in 5.23.0, two in 5.24.0) fail on linux-aarch64 only: float16 CPU F.linear / F.conv2d
+    # under pytorch 2.15.0 cpu_openblas raise oneDNN "could not create a primitive descriptor for the matmul /
+    # convolution forward propagation primitive"; the AnyToAny twins pass. Closest upstream report:
+    # https://github.com/pytorch/pytorch/issues/125247 (open); re-enable once a pytorch update no longer fails here
     {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_multiple_candidates_tiny_model)" %}  # [aarch64]
-    # New in 5.24.0: two more tiny-Llava tests hit the same oneDNN error (matmul / convolution primitive)
     {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_return_tensors_with_chat_input)" %}  # [aarch64]
     {% set skip_tests = skip_tests + " or (ImageTextToTextPipelineTests and test_generate_kwargs_not_mutated_tiny_llava)" %}  # [aarch64]
 
